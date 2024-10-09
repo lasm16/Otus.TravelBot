@@ -10,15 +10,15 @@ namespace ConsoleBot.dto.Users
     {
         public Guid Id { get; private set; }
         public string Name { get; private set; }
-        public string Email { get; private set; }
+        public string LinkTg { get; private set; }
         public UserType UserType { get; private set; }
         public List<Post> Posts { get; set; }
 
-        public User(Guid id, string name, string email, UserType userType)
+        public User(Guid id, string name, string linkTg, UserType userType)
         {
             Id = id;
             Name = name;
-            Email = email;
+            LinkTg = linkTg;
             UserType = userType;
         }
     }

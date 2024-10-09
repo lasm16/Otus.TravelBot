@@ -14,7 +14,7 @@ namespace ConsoleBot.dto
         public DateTime TravelDateEnd { get; set; }
         public string Description { get; set; }
         public byte[] Picture { get; set; }
-        public string Link { get; set; }
+        public string LinkToVk { get; set; }
         public string Status { get; set; }
         public bool IsVip { get; set; }
         public bool IsVipRequested { get; set; }
@@ -25,7 +25,7 @@ namespace ConsoleBot.dto
             TravelDateStart = dateTimeStart;
             TravelDateEnd = dateTimeEnd;
             Description = discription;
-            Link = link;
+            LinkToVk = link;
             Status = "Планируется";
         }
     }
