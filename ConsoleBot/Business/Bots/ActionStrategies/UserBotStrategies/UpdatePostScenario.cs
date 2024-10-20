@@ -3,11 +3,11 @@ using Common.Model;
 using Common.Model.Bot;
 using ConsoleBot.Data;
 
-namespace ConsoleBot.Bots.ActionStrategies.UserBotStrategies
+namespace ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies
 {
-    internal class UpdatePostScenario : IActionStrategy
+    internal class UpdatePostScenario(User user) : IActionStrategy
     {
-        public void DoAction(IUser user)
+        public void DoAction()
         {
             var inputLine = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.PostForUpdate);
             Guid.TryParse(inputLine, out var guid);
@@ -24,7 +24,7 @@ namespace ConsoleBot.Bots.ActionStrategies.UserBotStrategies
             UpdatePost(user, guid, startDate, endDate, description, link);
         }
 
-        private void UpdatePost(IUser user, Guid guid, DateTime dateTimeStart, DateTime dateTimeEnd, string description, string link)
+        private void UpdatePost(User user, Guid guid, DateTime dateTimeStart, DateTime dateTimeEnd, string description, string link)
         {
             var post = user.Posts.FirstOrDefault(x => x.Id == guid);
 

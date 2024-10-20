@@ -1,5 +1,6 @@
 ﻿using Common.Model.Bot;
 using Common.Services;
+using Serilog;
 
 namespace ConsoleBot.Service
 {
@@ -17,6 +18,7 @@ namespace ConsoleBot.Service
 
         public void LaunchScenario(string scenario)
         {
+            Log.Debug($"Запускаем сценарий для бота: {scenario}");
             _bot.PerfomAction(scenario);
         }
     }

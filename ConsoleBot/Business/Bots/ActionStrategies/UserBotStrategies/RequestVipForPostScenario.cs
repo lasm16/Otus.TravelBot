@@ -3,11 +3,11 @@ using Common.Model;
 using Common.Model.Bot;
 using ConsoleBot.Data;
 
-namespace ConsoleBot.Bots.ActionStrategies.UserBotStrategies
+namespace ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies
 {
-    internal class RequestVipForPostScenario : IActionStrategy
+    internal class RequestVipForPostScenario(User user) : IActionStrategy
     {
-        public void DoAction(IUser user)
+        public void DoAction()
         {
             Console.WriteLine(BotPhrases.PostForVip);
 
@@ -16,12 +16,13 @@ namespace ConsoleBot.Bots.ActionStrategies.UserBotStrategies
             RequestVipFotPost(user, guid);
         }
 
-        private void RequestVipFotPost(IUser user, Guid guid)
+        private void RequestVipFotPost(User user, Guid guid)
         {
             var post = user.Posts.FirstOrDefault(x => x.Id == guid);
             if (post != null)
             {
                 post.IsVipRequested = true;
+                return;
             }
             Console.WriteLine($"Пост с id = {guid} не найден!");
         }

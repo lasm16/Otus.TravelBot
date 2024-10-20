@@ -1,11 +1,11 @@
 ﻿using Common.Model;
 using Common.Model.Bot;
 
-namespace ConsoleBot.Bots.ActionStrategies.AdminBotStrategies
+namespace ConsoleBot.Business.Bots.ActionStrategies.AdminBotStrategies
 {
     internal class PublishedScenario : IActionStrategy
     {
-        public void DoAction(IUser user)
+        public void DoAction()
         {
             throw new NotImplementedException();
         }

@@ -1,15 +1,14 @@
 ﻿using Common.Model;
 using Common.Model.Bot;
-using ConsoleBot.Bots.ActionStrategies.UserBotStrategies;
+using ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies;
 
-namespace ConsoleBot.Bots
+namespace ConsoleBot.Business.Bots
 {
     public class UserBot : IBot
     {
         private User _currentUser;
         private Dictionary<string, IActionStrategy> actionWithStrategyDictionary;
 
-        public IList<Post> Posts => _currentUser.Posts;
         public IList<string> AvailableActions => [.. actionWithStrategyDictionary.Keys];
 
         public UserBot(User user)
@@ -22,19 +21,19 @@ namespace ConsoleBot.Bots
         public void PerfomAction(string action)
         {
             var strategy = actionWithStrategyDictionary[action];
-            strategy.DoAction(_currentUser);
+            strategy.DoAction();
         }
 
         private void FillDictionaryWithStratagies()
         {
             actionWithStrategyDictionary = new Dictionary<string, IActionStrategy>
             {
-                { "Создать новую поездку",  new NewTripScenario() },
-                { "Найти попутчика",        new FindFellowScenario() },
-                { "Мои поездки",            new ShowMyTripsScenario() },
-                { "Редактировать пост",     new UpdatePostScenario() },
-                { "Удалить пост",           new DeletePostScenario() },
-                { "Запрос на VIP-пост",     new RequestVipForPostScenario() }
+                { "Создать новую поездку",  new NewTripScenario(_currentUser) },
+                { "Найти попутчика",        new FindFellowScenario(_currentUser) },
+                { "Мои поездки",            new ShowMyTripsScenario(_currentUser) },
+                { "Редактировать пост",     new UpdatePostScenario(_currentUser) },
+                { "Удалить пост",           new DeletePostScenario(_currentUser) },
+                { "Запрос на VIP-пост",     new RequestVipForPostScenario(_currentUser) }
             };
         }
     }

@@ -1,8 +1,8 @@
 ﻿using Common.Model;
 using Common.Model.Bot;
-using ConsoleBot.Bots.ActionStrategies.AdminBotStrategies;
+using ConsoleBot.Business.Bots.ActionStrategies.AdminBotStrategies;
 
-namespace ConsoleBot.Bots
+namespace ConsoleBot.Business.Bots
 {
     public class AdminBot : IBot
     {
@@ -10,7 +10,6 @@ namespace ConsoleBot.Bots
         private static string _greetingMessage = "Добрый день, админ. Что будем делать?";
         private Dictionary<string, IActionStrategy> actionWithStrategyDictionary;
 
-        public IList<Post> Posts => _currentUser.Posts;
         public IList<string> AvailableActions => [.. actionWithStrategyDictionary.Keys];
 
         public AdminBot(User user)
@@ -24,7 +23,7 @@ namespace ConsoleBot.Bots
         public void PerfomAction(string action)
         {
             var strategy = actionWithStrategyDictionary[action];
-            strategy.DoAction(_currentUser);
+            strategy.DoAction();
         }
 
         private void FillDictionaryWithStratagies()

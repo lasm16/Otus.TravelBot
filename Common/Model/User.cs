@@ -1,6 +1,6 @@
 ﻿namespace Common.Model
 {
-    public class User: IUser
+    public class User
     {
         public Guid Id { get; private set; }
         public string Name { get; private set; }

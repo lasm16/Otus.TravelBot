@@ -1,8 +1,11 @@
 ﻿using Common.Bot;
 using Common.Model;
 using Common.Model.Bot;
-using ConsoleBot.Bots;
+using ConsoleBot.Business.Bots;
+using ConsoleBot.Data;
+using ConsoleBot.Data.Logger;
 using ConsoleBot.Service;
+using Serilog;
 
 namespace ConsoleBot
 {
@@ -12,10 +15,10 @@ namespace ConsoleBot
         {
             User user;
             IBot bot;
+            Logger.GetLogger();
 
             Console.WriteLine(BotPhrases.Welcome);
-            Console.WriteLine(BotPhrases.Role);
-            var role = Console.ReadLine();
+            var role = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.Role);
 
             if (role.Equals("пользователь"))
             {
@@ -28,6 +31,7 @@ namespace ConsoleBot
                 bot = new AdminBot(user);
             }
 
+            Log.Debug($"Пользователь залогинился с ролью {user.UserType}");
             var service = new ConsoleBotService(bot);
             service.Greeting();
 

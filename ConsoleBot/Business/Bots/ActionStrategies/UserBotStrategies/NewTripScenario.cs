@@ -3,11 +3,11 @@ using Common.Model;
 using Common.Model.Bot;
 using ConsoleBot.Data;
 
-namespace ConsoleBot.Bots.ActionStrategies.UserBotStrategies
+namespace ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies
 {
-    internal class NewTripScenario : IActionStrategy
+    internal class NewTripScenario(User user) : IActionStrategy
     {
-        public void DoAction(IUser user)
+        public void DoAction()
         {
             Console.WriteLine(BotPhrases.Agreement);
 
@@ -24,7 +24,7 @@ namespace ConsoleBot.Bots.ActionStrategies.UserBotStrategies
             Console.WriteLine(BotPhrases.Done);
         }
 
-        private void CreateNewPost(IUser user, DateTime dateTimeStart, DateTime dateTimeEnd, string description, string link)
+        private void CreateNewPost(User user, DateTime dateTimeStart, DateTime dateTimeEnd, string description, string link)
         {
             var post = new Post(new Guid(), dateTimeStart, dateTimeEnd, description, link);
             user.Posts.Add(post);

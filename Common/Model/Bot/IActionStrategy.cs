@@ -2,6 +2,6 @@
 {
     public interface IActionStrategy
     {
-        public void DoAction(IUser user);
+        public void DoAction();
     }
 }
