@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ConsoleBot.dto.Users
+﻿namespace Common.Model
 {
-    public class User
+    public class User: IUser
     {
         public Guid Id { get; private set; }
         public string Name { get; private set; }
         public string LinkTg { get; private set; }
         public UserType UserType { get; private set; }
-        public List<Post> Posts { get; set; }
+        public IList<Post> Posts { get; set; }
 
         public User(Guid id, string name, string linkTg, UserType userType)
         {

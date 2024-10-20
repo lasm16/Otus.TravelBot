@@ -1,11 +1,12 @@
-﻿using ConsoleBot.Bots;
-using ConsoleBot.dto;
-using ConsoleBot.dto.Users;
-using ConsoleBot.service;
+﻿using Common.Bot;
+using Common.Model;
+using Common.Model.Bot;
+using ConsoleBot.Bots;
+using ConsoleBot.Service;
 
 namespace ConsoleBot
 {
-    internal class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -24,20 +25,21 @@ namespace ConsoleBot
             else
             {
                 user = new User(new Guid(), "Петя", "PrettyBitch", UserType.Admin);
-                bot = new AdminBot();
+                bot = new AdminBot(user);
             }
 
             var service = new ConsoleBotService(bot);
             service.Greeting();
 
-            var actions = service.Actions; 
+            var actions = service.Actions;
             Console.WriteLine(BotPhrases.AvailableActions);
             foreach (var action in actions)
             {
                 Console.WriteLine(action);
             }
             var userAction = Console.ReadLine();
-            service.LauchScenario(userAction);
+
+            service.LaunchScenario(userAction);
         }
     }
 }

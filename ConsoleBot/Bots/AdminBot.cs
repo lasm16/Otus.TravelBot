@@ -1,43 +1,42 @@
-﻿using ConsoleBot.dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Common.Model;
+using Common.Model.Bot;
+using ConsoleBot.Bots.ActionStrategies.AdminBotStrategies;
 
 namespace ConsoleBot.Bots
 {
     public class AdminBot : IBot
     {
+        private User _currentUser;
         private static string _greetingMessage = "Добрый день, админ. Что будем делать?";
+        private Dictionary<string, IActionStrategy> actionWithStrategyDictionary;
+
+        public IList<Post> Posts => _currentUser.Posts;
+        public IList<string> AvailableActions => [.. actionWithStrategyDictionary.Keys];
+
+        public AdminBot(User user)
+        {
+            _currentUser = user;
+            FillDictionaryWithStratagies();
+        }
 
         public string SendGreetingMessage() => _greetingMessage;
 
-        public void PerfomAction(string message)
+        public void PerfomAction(string action)
         {
-            switch (message)
+            var strategy = actionWithStrategyDictionary[action];
+            strategy.DoAction(_currentUser);
+        }
+
+        private void FillDictionaryWithStratagies()
+        {
+            actionWithStrategyDictionary = new Dictionary<string, IActionStrategy>
             {
-                case "Новые посты": GetNewPosts(); break;
-                case "Опубликованные посты": GetPublishedPosts(); break;
-            }
-        }
-
-        private List<Post> GetPublishedPosts()
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Post> GetNewPosts()
-        {
-            throw new NotImplementedException();
-        }
-        public void AcceptPost() { }
-        public void DeclinePost() { }
-        public void PinPost(Guid id) { }
-
-        public void PerfomAction(string action, params string[]? args)
-        {
-            throw new NotImplementedException();
+                { "Новые посты",            new NewPostScenario() },
+                { "Опубликованные посты",   new PublishedScenario() },
+                { "Принять",                new AcceptPostScenario() },
+                { "Отклонить",              new DeclinePostScenario() },
+                { "Сделать VIP-пост",       new MakeVipPostScenario() }
+            };
         }
     }
 }
