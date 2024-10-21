@@ -12,8 +12,6 @@ namespace ConsoleBot.Business.Bots.ActionStrategies.AdminBotStrategies
         private List<Post> _posts = DataRepository.Posts;
         public void DoAction()
         {
-            Console.WriteLine(BotPhrases.PostForVip);
-
             var inputLine = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.PostForVip);
             Guid.TryParse(inputLine, out var guid);
             MakePostVip(guid);

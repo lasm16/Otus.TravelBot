@@ -4,17 +4,17 @@ using ConsoleBot.Business.Repositories;
 
 namespace ConsoleBot.Business.Bots.ActionStrategies.AdminBotStrategies
 {
-    internal class NewPostScenario : IActionStrategy
+    internal class ShowPublishedPostsScenario : IActionStrategy
     {
         private List<Post> _posts = DataRepository.Posts;
         public void DoAction()
         {
-            ShowNewPosts();
+            ShowPublishedPosts();
         }
 
-        private void ShowNewPosts()
+        private void ShowPublishedPosts()
         {
-            var newPosts = _posts.Where(x => x.Status.Equals("На рассмотрении администрацией"));
+            var newPosts = _posts.Where(x => x.Status.Equals("Запланирована"));
             foreach (var post in newPosts)
             {
                 Console.WriteLine(post);

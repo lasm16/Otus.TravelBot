@@ -1,5 +1,6 @@
 ﻿using Common.Model;
 using Common.Model.Bot;
+using ConsoleBot.Business.Bots.ActionStrategies;
 using ConsoleBot.Business.Bots.ActionStrategies.AdminBotStrategies;
 
 namespace ConsoleBot.Business.Bots
@@ -31,7 +32,7 @@ namespace ConsoleBot.Business.Bots
             actionWithStrategyDictionary = new Dictionary<string, IActionStrategy>
             {
                 { "Новые посты",            new NewPostScenario() },
-                { "Опубликованные посты",   new PublishedScenario() },
+                { "Опубликованные посты",   new ShowPublishedPostsScenario() },
                 { "Принять",                new AcceptPostScenario() },
                 { "Отклонить",              new DeclinePostScenario() },
                 { "Сделать VIP-пост",       new MakeVipPostScenario() }

@@ -29,7 +29,7 @@ namespace ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies
                 var posts = userInList.Posts;
                 foreach (var post in posts)
                 {
-                    if (post.TravelDateStart == dateTime)
+                    if (post.TravelDateStart == dateTime && post.Status.Equals("Запланирована"))
                     {
                         Console.WriteLine($"Автор поста {userInList.LinkTg} \n {post}");
                     }

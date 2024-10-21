@@ -19,7 +19,7 @@
             TravelDateEnd = dateTimeEnd;
             Description = discription;
             LinkToVk = link;
-            Status = "Планируется";
+            Status = "На рассмотрении админисрацией";
         }
     }
 }
