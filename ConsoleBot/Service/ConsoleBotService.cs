@@ -34,7 +34,7 @@ namespace ConsoleBot.Service
             }
             else
             {
-                FillDictionaryWithAdminScenario();
+                FillDictionaryWithAdminScenarios();
             }
         }
 
@@ -68,7 +68,7 @@ namespace ConsoleBot.Service
             }
         }
 
-        private void FillDictionaryWithAdminScenario()
+        private void FillDictionaryWithAdminScenarios()
         {
             var count = _bot.Actions.Count;
             for (var i = 0; i < count; i++)
