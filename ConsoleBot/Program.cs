@@ -19,19 +19,18 @@ namespace ConsoleBot
 
             Console.WriteLine(BotPhrases.Welcome);
             var role = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.Role);
-
             if (role.Equals("пользователь"))
             {
-                user = new User(new Guid(), "Вася", "Ololoev1", UserType.SimpleUser);
+                user = new User(Guid.NewGuid(), "Вася", "Ololoev1", UserType.SimpleUser);
                 bot = new UserBot(user);
             }
             else
             {
-                user = new User(new Guid(), "Петя", "PrettyBitch", UserType.Admin);
+                user = new User(Guid.NewGuid(), "Петя", "PrettyBitch", UserType.Admin);
                 bot = new AdminBot();
             }
 
-            Log.Debug($"Пользователь залогинился с ролью {user.UserType}");
+            Log.Debug($"В систему вошел пользователь: {user.Id}, {user.Name}, {user.UserType}");
             var service = new ConsoleBotService(bot);
             service.Greeting();
 
