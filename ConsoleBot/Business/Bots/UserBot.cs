@@ -1,6 +1,6 @@
 ﻿using Common.Model;
 using Common.Model.Bot;
-using ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies;
+using ConsoleBot.Business.Bots.Scenarios.UserBotScenarios;
 
 namespace ConsoleBot.Business.Bots
 {

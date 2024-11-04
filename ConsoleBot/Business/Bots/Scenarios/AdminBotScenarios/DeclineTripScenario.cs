@@ -5,7 +5,7 @@ using ConsoleBot.Business.Repositories;
 using ConsoleBot.Data;
 using Serilog;
 
-namespace ConsoleBot.Business.Bots.ActionStrategies.AdminBotStrategies
+namespace ConsoleBot.Business.Bots.Scenarios.AdminBotScenarios
 {
     internal class DeclineTripScenario : IAction
     {

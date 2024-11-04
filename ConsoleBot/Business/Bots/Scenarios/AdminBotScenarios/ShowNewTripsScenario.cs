@@ -3,7 +3,7 @@ using Common.Model.Bot;
 using ConsoleBot.Business.Repositories;
 using Serilog;
 
-namespace ConsoleBot.Business.Bots.ActionStrategies.AdminBotStrategies
+namespace ConsoleBot.Business.Bots.Scenarios.AdminBotScenarios
 {
     internal class ShowNewTripsScenario : IAction
     {

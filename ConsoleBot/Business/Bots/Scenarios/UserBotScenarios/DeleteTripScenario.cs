@@ -3,7 +3,7 @@ using Common.Model;
 using Common.Model.Bot;
 using ConsoleBot.Data;
 
-namespace ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies
+namespace ConsoleBot.Business.Bots.Scenarios.UserBotScenarios
 {
     public class DeleteTripScenario(User user) : IAction
     {

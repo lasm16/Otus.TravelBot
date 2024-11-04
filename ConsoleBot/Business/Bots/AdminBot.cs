@@ -1,5 +1,5 @@
 ﻿using Common.Model.Bot;
-using ConsoleBot.Business.Bots.ActionStrategies.AdminBotStrategies;
+using ConsoleBot.Business.Bots.Scenarios.AdminBotScenarios;
 
 namespace ConsoleBot.Business.Bots
 {

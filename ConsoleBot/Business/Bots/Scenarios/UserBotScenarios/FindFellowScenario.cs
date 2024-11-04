@@ -4,7 +4,7 @@ using Common.Model.Bot;
 using ConsoleBot.Business.Repositories;
 using ConsoleBot.Data;
 
-namespace ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies
+namespace ConsoleBot.Business.Bots.Scenarios.UserBotScenarios
 {
     public class FindFellowScenario(User user) : IAction
     {
