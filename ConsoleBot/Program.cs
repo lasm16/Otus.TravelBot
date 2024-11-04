@@ -35,11 +35,11 @@ namespace ConsoleBot
             var service = new ConsoleBotService(bot);
             service.Greeting();
 
-            var actionStrings = service.AvailibleActions.Keys;
-            Console.WriteLine(BotPhrases.AvailableActions);
-            foreach (var actionString in actionStrings)
+            var availibleActions = service.AvailibleActions.Keys;
+            Console.WriteLine(BotPhrases.AvailableActions + "\n");
+            foreach (var availibleAction in availibleActions)
             {
-                Console.WriteLine(actionString);
+                Console.WriteLine(availibleAction);
             }
             var userAction = Console.ReadLine()!;
             service.AvailibleActions.TryGetValue(userAction, out var action);
