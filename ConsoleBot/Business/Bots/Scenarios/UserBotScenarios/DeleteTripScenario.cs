@@ -5,21 +5,21 @@ using ConsoleBot.Data;
 
 namespace ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies
 {
-    public class DeletePostScenario(User user) : IActionStrategy
+    public class DeleteTripScenario(User user) : IAction
     {
         public void DoAction()
         {
             var inputLine = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.PostForDelete);
-            Guid.TryParse(inputLine, out var guid);
-            DeletePost(user, guid);
+            _ = Guid.TryParse(inputLine, out var guid);
+            DeleteTrip(user, guid);
         }
 
-        private void DeletePost(User user, Guid guid)
+        private static void DeleteTrip(User user, Guid guid)
         {
-            var post = user.Posts.FirstOrDefault(x => x.Id == guid);
-            if (post != null)
+            var trip = user.Trips.FirstOrDefault(x => x.Id == guid);
+            if (trip != null)
             {
-                user.Posts.Remove(post);
+                user.Trips.Remove(trip);
                 return;
             }
             Console.WriteLine($"Пост с id = {guid} не найден!");

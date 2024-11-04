@@ -1,6 +1,6 @@
 ﻿namespace Common.Model.Bot
 {
-    public interface IActionStrategy
+    public interface IAction
     {
         /// <summary>
         /// Команда, которую будет выполнять бот

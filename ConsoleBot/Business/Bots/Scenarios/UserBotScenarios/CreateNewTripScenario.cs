@@ -5,29 +5,29 @@ using ConsoleBot.Data;
 
 namespace ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies
 {
-    internal class NewTripScenario(User user) : IActionStrategy
+    internal class CreateNewTripScenario(User user) : IAction
     {
         public void DoAction()
         {
             Console.WriteLine(BotPhrases.Agreement);
 
             var dateTimeStartString = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.SuggestStartDate);
-            DateTime.TryParse(dateTimeStartString, out var startDate);
+            _ = DateTime.TryParse(dateTimeStartString, out var startDate);
 
             var dateTimeEndString = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.SuggestEndDate);
-            DateTime.TryParse(dateTimeEndString, out var endDate);
+            _ = DateTime.TryParse(dateTimeEndString, out var endDate);
 
             var description = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.Description);
-            var link = ConsoleLineExtractor.GetLineFromConsole(BotPhrases.LinkVk);
+            byte[]? picture = null; // заглушка
 
-            CreateNewPost(user, startDate, endDate, description, link);
+            CreateNewTrip(user, startDate, endDate, description, picture);
             Console.WriteLine(BotPhrases.Done);
         }
 
-        private void CreateNewPost(User user, DateTime dateTimeStart, DateTime dateTimeEnd, string description, string link)
+        private static void CreateNewTrip(User user, DateTime dateTimeStart, DateTime dateTimeEnd, string description, byte[]? picture)
         {
-            var post = new Post(new Guid(), dateTimeStart, dateTimeEnd, description, link);
-            user.Posts.Add(post);
+            var trip = new Trip(new Guid(), dateTimeStart, dateTimeEnd, description, picture);
+            user.Trips.Add(trip);
         }
     }
 }

@@ -1,25 +1,24 @@
 ﻿namespace Common.Model
 {
+
+    /// <summary>
+    /// Depricated
+    /// Пост связан с поездкой, но пока не стоит трогать, чтобы не усложнять логику
+    /// </summary>
     public class Post
     {
         public Guid Id { get; set; }
-        public DateTime TravelDateStart { get; set; }
-        public DateTime TravelDateEnd { get; set; }
-        public string Description { get; set; }
-        public byte[] Picture { get; set; }
-        public string LinkToVk { get; set; }
-        public string Status { get; set; }
+        public Trip Trip { get; set; }
         public bool IsVip { get; set; }
         public bool IsVipRequested { get; set; }
 
-        public Post(Guid id, DateTime dateTimeStart, DateTime dateTimeEnd, string discription, string link)
+        public Post(Guid id, DateTime dateTimeStart, DateTime dateTimeEnd, string discription, byte[] picture)
         {
+            var trip = new Trip(new Guid(), dateTimeStart, dateTimeEnd, discription, picture);
+
             Id = id;
-            TravelDateStart = dateTimeStart;
-            TravelDateEnd = dateTimeEnd;
-            Description = discription;
-            LinkToVk = link;
-            Status = "На рассмотрении админисрацией";
+            Trip = trip;
+            Trip.Status = TripStatus.Review;
         }
     }
 }

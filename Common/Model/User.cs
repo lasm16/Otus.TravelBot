@@ -6,7 +6,7 @@
         public string Name { get; private set; }
         public string LinkTg { get; private set; }
         public UserType UserType { get; private set; }
-        public IList<Post> Posts { get; set; }
+        public List<Trip> Trips { get; set; }
 
         public User(Guid id, string name, string linkTg, UserType userType)
         {

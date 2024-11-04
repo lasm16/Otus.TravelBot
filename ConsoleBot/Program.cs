@@ -28,22 +28,22 @@ namespace ConsoleBot
             else
             {
                 user = new User(new Guid(), "Петя", "PrettyBitch", UserType.Admin);
-                bot = new AdminBot(user);
+                bot = new AdminBot();
             }
 
             Log.Debug($"Пользователь залогинился с ролью {user.UserType}");
             var service = new ConsoleBotService(bot);
             service.Greeting();
 
-            var actions = service.Actions;
+            var actionStrings = service.AvailibleActions.Keys;
             Console.WriteLine(BotPhrases.AvailableActions);
-            foreach (var action in actions)
+            foreach (var actionString in actionStrings)
             {
-                Console.WriteLine(action);
+                Console.WriteLine(actionString);
             }
-            var userAction = Console.ReadLine();
-
-            service.LaunchScenario(userAction);
+            var userAction = Console.ReadLine()!;
+            service.AvailibleActions.TryGetValue(userAction, out var action);
+            service.LaunchScenario(action!);
         }
     }
 }

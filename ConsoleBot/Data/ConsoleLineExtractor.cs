@@ -6,7 +6,7 @@
         {
             Console.WriteLine(question);
             var line = Console.ReadLine();
-            return line;
+            return line!;
         }
     }
 }

@@ -1,41 +1,21 @@
 ﻿using Common.Model;
 using Common.Model.Bot;
-using ConsoleBot.Business.Bots.ActionStrategies;
 using ConsoleBot.Business.Bots.ActionStrategies.UserBotStrategies;
 
 namespace ConsoleBot.Business.Bots
 {
-    public class UserBot : IBot
+    public class UserBot(User user) : IBot
     {
-        private User _currentUser;
-        private Dictionary<string, IActionStrategy> actionWithStrategyDictionary;
+        private User _currentUser = user;
 
-        public IList<string> AvailableActions => [.. actionWithStrategyDictionary.Keys];
-
-        public UserBot(User user)
-        {
-            _currentUser = user;
-            FillDictionaryWithStratagies();
-        }
-
-        public string SendGreetingMessage() => $"Приветствую тебя, {_currentUser.Name}! Ты можешь выложить пост о планируемой поездке или найти попутчика";
-        public void PerfomAction(string action)
-        {
-            var strategy = actionWithStrategyDictionary[action];
-            strategy.DoAction();
-        }
-
-        private void FillDictionaryWithStratagies()
-        {
-            actionWithStrategyDictionary = new Dictionary<string, IActionStrategy>
-            {
-                { "Создать новую поездку",  new NewTripScenario(_currentUser) },
-                { "Найти попутчика",        new FindFellowScenario(_currentUser) },
-                { "Мои поездки",            new ShowMyTripsScenario(_currentUser) },
-                { "Редактировать пост",     new UpdatePostScenario(_currentUser) },
-                { "Удалить пост",           new DeletePostScenario(_currentUser) },
-                { "Запрос на VIP-пост",     new RequestVipForPostScenario(_currentUser) }
-            };
-        }
+        public List<IAction> Actions =>
+        [
+            new CreateNewTripScenario(_currentUser),
+            new FindFellowScenario(_currentUser),
+            new ShowTripsScenario(_currentUser),
+            new UpdateTripScenario(_currentUser),
+            new DeleteTripScenario(_currentUser)
+        ];
+        public string GreetingMessage => $"Приветствую тебя, {_currentUser.Name}! Ты можешь выложить пост о планируемой поездке или найти попутчика";
     }
 }

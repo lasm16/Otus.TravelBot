@@ -5,8 +5,7 @@
     /// </summary>
     public interface IBot
     {
-        public IList<string> AvailableActions { get; }
-        public string SendGreetingMessage();
-        public void PerfomAction(string action);
+        public List<IAction> Actions { get; }
+        public string GreetingMessage { get; }
     }
 }
