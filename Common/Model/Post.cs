@@ -9,16 +9,22 @@
     {
         public Guid Id { get; set; }
         public Trip Trip { get; set; }
-        public bool IsVip { get; set; }
-        public bool IsVipRequested { get; set; }
+        public VipStatus Status { get; set; }
 
         public Post(Guid id, DateTime dateTimeStart, DateTime dateTimeEnd, string discription, byte[] picture)
         {
-            var trip = new Trip(new Guid(), dateTimeStart, dateTimeEnd, discription, picture);
+            var trip = new Trip(Guid.NewGuid(), dateTimeStart, dateTimeEnd, discription, picture);
 
             Id = id;
             Trip = trip;
             Trip.Status = TripStatus.Review;
         }
+    }
+
+    public enum VipStatus
+    {
+        Requested,
+        Vip,
+        Regular
     }
 }

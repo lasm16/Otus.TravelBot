@@ -7,7 +7,6 @@ namespace Common.Bot
         public const string Welcome = "Добро подаловать в прототип бота для ТГ";
         public const string Role = "Выберите свою роль: админ или пользователь";
         public const string AvailableActions = "Список доступных действий: ";
-        public const string UnavailableActions = "Такого действия нет!";
 
         public const string Agreement = "Для того чтобы ваш пост был размещён в группе он должен соответствовать следующему описанию:";
         public const string SuggestStartDate = "1) Предполагаемую дату начала поездки в формате ДД.ММ.ГГГГ: ";

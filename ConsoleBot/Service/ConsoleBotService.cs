@@ -1,4 +1,5 @@
-﻿using Common.Model.Bot;
+﻿using Common.Bot;
+using Common.Model.Bot;
 using Common.Services;
 using ConsoleBot.Business.Bots;
 using Serilog;
@@ -23,7 +24,7 @@ namespace ConsoleBot.Service
         ];
         private IBot _bot;
 
-        public Dictionary<string, IAction> AvailibleActions = [];
+        private Dictionary<string, IAction> _availableActions = [];
 
         public ConsoleBotService(IBot bot)
         {
@@ -38,14 +39,19 @@ namespace ConsoleBot.Service
             }
         }
 
-        public void Greeting()
+        public void Start()
         {
-            var message = _bot.GreetingMessage;
-            Console.WriteLine(message);
-        }
+            Greeting();
 
-        public void LaunchScenario(IAction action)
-        {
+            var availibleActions = _availableActions.Keys;
+            Console.WriteLine(BotPhrases.AvailableActions + "\n");
+            foreach (var availibleAction in availibleActions)
+            {
+                Console.WriteLine(availibleAction);
+            }
+
+            var userAction = Console.ReadLine()!;
+            _availableActions.TryGetValue(userAction, out var action);
             var scenario = _bot.Actions.Find(x => x.Equals(action));
             if (scenario == null)
             {
@@ -62,9 +68,9 @@ namespace ConsoleBot.Service
             var count = _bot.Actions.Count;
             for (var i = 0; i < count; i++)
             {
-                var value = _bot.Actions[i];
                 var key = _userScenarios[i];
-                AvailibleActions.Add(key, value);
+                var value = _bot.Actions[i];
+                _availableActions.Add(key, value);
             }
         }
 
@@ -73,10 +79,16 @@ namespace ConsoleBot.Service
             var count = _bot.Actions.Count;
             for (var i = 0; i < count; i++)
             {
-                var value = _bot.Actions[i];
                 var key = _adminScenarios[i];
-                AvailibleActions.Add(key, value);
+                var value = _bot.Actions[i];
+                _availableActions.Add(key, value);
             }
+        }
+
+        private void Greeting()
+        {
+            var message = _bot.GreetingMessage;
+            Console.WriteLine(message);
         }
     }
 }

@@ -32,17 +32,7 @@ namespace ConsoleBot
 
             Log.Debug($"В систему вошел пользователь: {user.Id}, {user.Name}, {user.UserType}");
             var service = new ConsoleBotService(bot);
-            service.Greeting();
-
-            var availibleActions = service.AvailibleActions.Keys;
-            Console.WriteLine(BotPhrases.AvailableActions + "\n");
-            foreach (var availibleAction in availibleActions)
-            {
-                Console.WriteLine(availibleAction);
-            }
-            var userAction = Console.ReadLine()!;
-            service.AvailibleActions.TryGetValue(userAction, out var action);
-            service.LaunchScenario(action!);
+            service.Start();
         }
     }
 }
