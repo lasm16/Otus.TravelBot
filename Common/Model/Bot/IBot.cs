@@ -5,7 +5,7 @@
     /// </summary>
     public interface IBot
     {
-        public List<IAction> Actions { get; }
+        public Dictionary<string, IAction> Actions { get; }
         public string GreetingMessage { get; }
     }
 }

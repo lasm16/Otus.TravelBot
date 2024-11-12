@@ -8,14 +8,14 @@ namespace ConsoleBot.Business.Bots
     {
         private User _currentUser = user;
 
-        public List<IAction> Actions =>
-        [
-            new CreateNewTripScenario(_currentUser),
-            new FindFellowScenario(_currentUser),
-            new ShowTripsScenario(_currentUser),
-            new UpdateTripScenario(_currentUser),
-            new DeleteTripScenario(_currentUser)
-        ];
+        public Dictionary<string, IAction> Actions => new()
+        {
+            { "Создать новую поездку",  new CreateNewTripScenario(_currentUser) },
+            { "Найти попутчика",        new FindFellowScenario(_currentUser) },
+            { "Мои поездки",            new ShowTripsScenario(_currentUser) },
+            { "Редактировать поездку",  new UpdateTripScenario(_currentUser) },
+            { "Удалить поездку",        new DeleteTripScenario(_currentUser) },
+        };
         public string GreetingMessage => $"Приветствую тебя, {_currentUser.Name}! Ты можешь выложить пост о планируемой поездке или найти попутчика";
     }
 }

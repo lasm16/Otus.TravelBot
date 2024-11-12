@@ -5,12 +5,12 @@ namespace ConsoleBot.Business.Bots
 {
     public class AdminBot() : IBot
     {
-        public List<IAction> Actions =>
-        [
-            new ShowNewTripsScenario(),
-            new AcceptTripScenario(),
-            new DeclineTripScenario()
-        ];
+        public Dictionary<string, IAction> Actions => new()
+        {
+            { "Новые посты",  new ShowNewTripsScenario() },
+            { "Принять",      new AcceptTripScenario() },
+            { "Отклонить",    new DeclineTripScenario() },
+        };
         public string GreetingMessage => "Добрый день, админ. Что будем делать?";
     }
 }
