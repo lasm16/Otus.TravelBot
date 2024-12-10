@@ -4,7 +4,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 {
     internal class CreateNewTripScenario : IScenario
     {
-        public string Text { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string? Text { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public void DoAction()
         {

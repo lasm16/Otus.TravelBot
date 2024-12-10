@@ -7,22 +7,21 @@ using Common.Model.Bot;
 using Common.Model;
 using TelegramBot.Business.Bots.Roles;
 
-
 namespace TelegramBot.Business.Bots
 {
     public class TelegramBotImpl : IBot
     {
-        private TelegramBotClient _client;
+        private IBotRole? _botRole;
+        private TelegramBotClient? _client;
         private readonly string? _key = System.Configuration.ConfigurationManager.AppSettings["userBotToken"];
-        private IBotRole _botRole;
 
         public static string? UserName { get; private set; }
         public async Task CreateBotAsync()
         {
             using var cts = new CancellationTokenSource();
-            if (_key == null)
+            if (_key == null || string.Empty.Equals(_key))
             {
-                throw new ArgumentNullException("Не установлен токен в App.config!");
+                throw new ArgumentNullException(_key, "Не установлен токен в App.config!");
             }
             _client = new TelegramBotClient(_key, cancellationToken: cts.Token);
             var me = await _client.GetMe();
@@ -30,9 +29,9 @@ namespace TelegramBot.Business.Bots
             _client.OnError += OnError;
             _client.OnUpdate += OnUpdate;
 
-            Console.WriteLine($"@{me.Username} is running... Press Esc to terminate");
+            Console.WriteLine($"@{me!.Username} is running... Press Esc to terminate");
             while (Console.ReadKey(true).Key != ConsoleKey.Escape) ;
-            cts.Cancel(); // stop the bot
+            cts.Cancel();
         }
 
         private async Task OnUpdate(Update update)
@@ -54,22 +53,22 @@ namespace TelegramBot.Business.Bots
             }
             CheckRole(message);
             var action = message.Text;
-            var scenario = _botRole.Actions.FirstOrDefault(t => t.Key == action).Value;
+            var scenario = _botRole!.Actions.FirstOrDefault(t => t.Key == action).Value;
             if (scenario == null)
             {
                 Log.Error("Некорректно указан сценарий!");
-                await _client.SendMessage(message.Chat, $"Некорректно указан сценарий!");
+                await _client!.SendMessage(message.Chat, $"Я не знаю этой команды...");
                 return;
             }
             scenario.DoAction();
             var text = scenario.Text;
-            await _client.SendMessage(message.Chat, text);
+            await _client!.SendMessage(message.Chat, text!);
         }
 
         // переделать!!!
         private void CheckRole(Message message)
         {
-            var userId = message.From.Id;
+            var userId = message.From!.Id;
             var user = new Common.Model.User()
             {
                 Id = userId,

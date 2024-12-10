@@ -2,7 +2,7 @@
 {
     public interface IScenario
     {
-        string Text { get; set; }
+        string? Text { get; set; }
         void DoAction();
     }
 }
