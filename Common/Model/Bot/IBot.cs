@@ -1,11 +1,10 @@
 ﻿namespace Common.Model.Bot
 {
     /// <summary>
-    /// Бот, который будет выполнять команды
+    /// Бот для различных реализаций
     /// </summary>
     public interface IBot
     {
-        public Dictionary<string, IAction> Actions { get; }
-        public string GreetingMessage { get; }
+        public Task CreateBotAsync();
     }
 }
