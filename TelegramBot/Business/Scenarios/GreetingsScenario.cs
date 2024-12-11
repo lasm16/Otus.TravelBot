@@ -18,7 +18,7 @@ namespace TelegramBot.Business.Scenarios
 
 
             var inlineMarkup = new InlineKeyboardMarkup()
-                .AddButton("Создать новую поездку", "CreateNewTripScenario")
+                .AddButton("Новая поездка", "CreateNewTripScenario")
                 .AddButton("Найти попутчика", "FindFellowScenario");
 
             InlineKeyboard = inlineMarkup;
