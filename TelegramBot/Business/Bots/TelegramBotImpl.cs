@@ -57,12 +57,20 @@ namespace TelegramBot.Business.Bots
             if (scenario == null)
             {
                 Log.Error("Некорректно указан сценарий!");
-                await _client!.SendMessage(message.Chat, $"Я не знаю этой команды...");
+                await _client!.SendMessage(message.Chat.Id, $"Я не знаю этой команды...");
                 return;
             }
+            
             scenario.DoAction();
             var text = scenario.Text;
-            await _client!.SendMessage(message.Chat, text!);
+            if (scenario.InlineKeyboard != null)
+            {
+                await _client!.SendMessage(message.Chat.Id, text!, replyMarkup: scenario.InlineKeyboard);
+            }
+            else
+            {
+                await _client!.SendMessage(message.Chat.Id, text!);
+            }
         }
 
         // переделать!!!
