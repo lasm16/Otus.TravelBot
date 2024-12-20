@@ -12,7 +12,7 @@ namespace TelegramBot.Business.Bots.Roles
         public Dictionary<string, IScenario> Actions => new()
         {
             { "/start",  new GreetingsScenario(_message) },
-            { "Создать новую поездку",  new CreateNewTripScenario() },
+            { "Новая поездка",  new CreateNewTripScenario() },
             //{ "Найти попутчика",        new FindFellowScenario(_currentUser) },
             //{ "Мои поездки",            new ShowTripsScenario(_currentUser) },
             //{ "Редактировать поездку",  new UpdateTripScenario(_currentUser) },

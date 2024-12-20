@@ -36,7 +36,9 @@ namespace TelegramBot.Business.Bots
 
         private async Task OnUpdate(Update update)
         {
-            throw new NotImplementedException();
+            var action = update.CallbackQuery.Data;
+            var scenario = _botRole!.Actions.FirstOrDefault(t => t.Key == action).Value;
+            scenario.DoAction();
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
@@ -60,7 +62,7 @@ namespace TelegramBot.Business.Bots
                 await _client!.SendMessage(message.Chat.Id, $"Я не знаю этой команды...");
                 return;
             }
-            
+
             scenario.DoAction();
             var text = scenario.Text;
             if (scenario.InlineKeyboard != null)
