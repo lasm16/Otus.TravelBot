@@ -37,6 +37,8 @@ namespace TelegramBot.Business.Bots
         private async Task OnUpdate(Update update)
         {
             var action = update.CallbackQuery.Data;
+            var message = update.CallbackQuery.Message;
+            CheckRole(message);
             var scenario = _botRole!.Actions.FirstOrDefault(t => t.Key == action).Value;
             scenario.DoAction();
         }
