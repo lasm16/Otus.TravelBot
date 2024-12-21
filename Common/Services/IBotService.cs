@@ -5,6 +5,6 @@
     /// </summary>
     public interface IBotService
     {
-        public Task StartAsync();
+        public Task StartBotAsync();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using TelegramBot.Services;
-using TelegramBot.Business.Bots;
 
 namespace TelegramBot
 {
@@ -7,9 +6,8 @@ namespace TelegramBot
     {
         static async Task Main(string[] args)
         {
-            var bot = new TelegramBotImpl();
-            var service = new TelegramBotService(bot);
-            await service.StartAsync();
+            var service = new TelegramBotService();
+            await service.StartBotAsync();
         }
     }
 }

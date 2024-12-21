@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-namespace Common.Bot
+﻿namespace Common.Data
 {
     public class BotPhrases
     {
@@ -8,11 +6,11 @@ namespace Common.Bot
         public const string Role = "Выберите свою роль: админ или пользователь";
         public const string AvailableActions = "Список доступных действий: ";
 
-        public const string Agreement = "Для того чтобы ваш пост был размещён в группе он должен соответствовать следующему описанию:";
-        public const string SuggestStartDate = "1) Предполагаемую дату начала поездки в формате ДД.ММ.ГГГГ: ";
-        public const string SuggestEndDate = "2) Предполагаемую дату окончания поездки в формате ДД.ММ.ГГГГ: ";
-        public const string Description = "3) краткое описание плана по вашему путешествию.";
-        public const string Photo = "4) ваше фото.";
+        public const string Agreement = "Для того чтобы ваш пост был размещён в группе он должен соответствовать следующему описанию: \r\n";
+        public const string SuggestStartDate = "1) Предполагаемую дату начала поездки в формате ДД.ММ.ГГГГ: \r\n";
+        public const string SuggestEndDate = "2) Предполагаемую дату окончания поездки в формате ДД.ММ.ГГГГ: \r\n";
+        public const string Description = "3) краткое описание плана по вашему путешествию: \r\n";
+        public const string Photo = "4) ваше фото: \r\n";
         public const string LinkVk = "5) реальный аккаунт ВК (посты от фейк аккаунтов и закрытыми профилями не публикуем. Нужно только для проверки админу)";
         public const string Done = "Почти все готово! После проверки сообщения админстрацией ваш пост будет опубликован!";
 

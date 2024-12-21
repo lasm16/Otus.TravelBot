@@ -2,6 +2,6 @@
 {
     public interface IBotRole
     {
-        public Dictionary<string, IScenario> Actions { get; }
+        public Dictionary<string, IScenario> Actions { get; set; }
     }
 }
