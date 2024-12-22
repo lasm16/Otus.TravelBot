@@ -11,7 +11,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
-    internal class CreateNewTripScenario(TelegramBotClient botClient) : IScenario
+    public class CreateNewTripScenario(TelegramBotClient botClient) : IScenario
     {
         private Trip _trip = new();
         private TelegramBotClient _botClient = botClient;
@@ -25,13 +25,16 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnUpdate(Update update)
         {
+            var chatId = update.CallbackQuery!.Message!.Chat.Id;
             if (update.CallbackQuery!.Data == "Готово")
             {
-                // будет сохранение в БД
-                var chatId = update.CallbackQuery.Message!.Chat.Id;
+                // будет сохранение в БД. Сделаю позже сохранение в файл
                 var messageId = update.CallbackQuery.Message.Id;
                 await _botClient.SendMessage(chatId, BotPhrases.Done);
                 await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null); // пытаюсь скрыть клавиатуру, не работает. Почему?
+                UnsubscriveEvents();
+                var scenario = new GreetingsScenario(_botClient);
+                scenario.DoAction();
                 return;
             }
             if (update.CallbackQuery.Data == "Редактировать")
@@ -45,7 +48,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             };
             foreach (var message in messageList)
             {
-                await _botClient.SendMessage(update.CallbackQuery.Message!.Chat.Id, message);
+                await _botClient.SendMessage(chatId, message);
             }
         }
 
@@ -65,17 +68,24 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var (isFilled, outPutLine) = FillTrip(inputLine);
             if (isFilled)
             {
-                var inlineMarkup = new InlineKeyboardMarkup()
-                    .AddButton("Готово", "Готово")
-                    .AddButton("Редактировать", "Редактировать");
-
-                var userName = message.Chat.Username;
-                var tripText = GetTripText(outPutLine, userName!);
-                var photo = _trip.Photo;
-                await _botClient.SendPhoto(message.Chat.Id, photo, tripText, replyMarkup: inlineMarkup);
+                await SendMessageWithInlineKeyboard(message, outPutLine);
                 return;
             }
-            await _botClient.SendMessage(message.Chat.Id, outPutLine);
+            var chatId = message.Chat.Id;
+            await _botClient.SendMessage(chatId, outPutLine);
+        }
+
+        private async Task SendMessageWithInlineKeyboard(Message message, string outPutLine)
+        {
+            var inlineMarkup = new InlineKeyboardMarkup()
+                                .AddButton("Готово", "Готово")
+                                .AddButton("Редактировать", "Редактировать");
+
+            var userName = message.Chat.Username;
+            var tripText = GetTripText(outPutLine, userName!);
+            var photo = _trip.Photo;
+            var chatId = message.Chat.Id;
+            await _botClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup);
         }
 
         private string GetTripText(string text, string userName)
@@ -130,6 +140,13 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             _trip.Id = Guid.NewGuid();
             _trip.Status = TripStatus.Review;
             return (true, BotPhrases.ConfirmTrip);
+        }
+
+        private void UnsubscriveEvents()
+        {
+            _botClient.OnError -= OnError;
+            _botClient.OnMessage -= OnMessage;
+            _botClient.OnUpdate -= OnUpdate;
         }
     }
 }

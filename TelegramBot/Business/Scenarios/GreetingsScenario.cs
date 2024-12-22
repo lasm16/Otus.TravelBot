@@ -7,6 +7,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Business.Bots.Roles;
+using TelegramBot.Business.Scenarios.AdminScenarios;
 using TelegramBot.Business.Scenarios.UserScenarios;
 
 namespace TelegramBot.Business.Scenarios
@@ -30,17 +31,31 @@ namespace TelegramBot.Business.Scenarios
             {
                 return;
             }
+            var scenario = GetScenario(update);
+            await RemoveInlineKeyboard(update);
+            UnsubscriveEvents();
+            scenario.DoAction();
+        }
+
+        private IScenario GetScenario(Update update)
+        {
             var action = update.CallbackQuery!.Data;
-            var message = update.CallbackQuery.Message;
-            var scenario = _botRole!.Actions!.FirstOrDefault(t => t.Key == action).Value;
-            var chatId = update.CallbackQuery.Message!.Chat.Id;
+            // кидает NRE после нажатия кнопки "Готово" у подтверждения поездки
+            return _botRole!.Actions!.FirstOrDefault(t => t.Key == action).Value;
+        }
+
+        private async Task RemoveInlineKeyboard(Update update)
+        {
+            var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
-            var text = update.CallbackQuery.Message.Text;
             await _botClient.EditMessageReplyMarkup(chatId, messageId, null); // пытаюсь скрыть клавиатуру, не работает. Почему?
+        }
+
+        private void UnsubscriveEvents()
+        {
             _botClient.OnError -= OnError;
             _botClient.OnMessage -= OnMessage;
             _botClient.OnUpdate -= OnUpdate;
-            scenario.DoAction();
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
@@ -79,37 +94,62 @@ namespace TelegramBot.Business.Scenarios
 
         private void CheckRole(Message message)
         {
-            var userId = message.From!.Id;
-            var user = new Common.Model.User()
-            {
-                Id = userId,
-                UserType = UserType.SimpleUser
-            };
+            var tgUser = message.From;
+            var user = GetUser(tgUser!); // здесь должна быть проверка роли админ/юзер через значение в бд
             if (_botRole != null)
             {
                 return;
             }
             if (UserType.Admin == user.UserType)
             {
-                _botRole = new AdminRole
-                {
-                    Actions = new Dictionary<string, IScenario>
-                    {
-                        { "/start", new GreetingsScenario(_botClient) }
-                    }
-                };
+                SetAdminActions();
             }
-            else
+            else if (UserType.SimpleUser == user.UserType)
             {
-                _botRole = new UserRole
+                SetUserActions();
+            }
+        }
+
+        private Common.Model.User GetUser(Telegram.Bot.Types.User user)
+        {
+            var nickName = user.Username;
+            if (nickName == System.Configuration.ConfigurationManager.AppSettings["adminNickname"])
+            {
+                return new Common.Model.User()
                 {
-                    Actions = new Dictionary<string, IScenario>
-                    {
-                        //{ "/start", new GreetingsScenario(_botClient) },
-                        { "Новая поездка", new CreateNewTripScenario(_botClient) }
-                    }
+                    Id = user.Id,
+                    UserType = UserType.Admin
                 };
             }
+            return new Common.Model.User()
+            {
+                Id = user.Id,
+                UserType = UserType.SimpleUser
+            };
+        }
+
+        private void SetUserActions()
+        {
+            _botRole = new UserRole
+            {
+                Actions = new Dictionary<string, IScenario>
+                    {
+                        { "Новая поездка",      new CreateNewTripScenario(_botClient) },
+                        { "Мои поездки",        new ShowTripsScenario(_botClient) },
+                        { "Найти попутчика",    new FindFellowScenario(_botClient) }
+                    }
+            };
+        }
+
+        private void SetAdminActions()
+        {
+            _botRole = new AdminRole
+            {
+                Actions = new Dictionary<string, IScenario>
+                    {
+                        { "Новые посты",    new ShowNewTripsScenario(_botClient) },
+                    }
+            };
         }
     }
 }
