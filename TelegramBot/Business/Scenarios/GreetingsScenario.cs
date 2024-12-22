@@ -33,6 +33,10 @@ namespace TelegramBot.Business.Scenarios
             var action = update.CallbackQuery!.Data;
             var message = update.CallbackQuery.Message;
             var scenario = _botRole!.Actions!.FirstOrDefault(t => t.Key == action).Value;
+            var chatId = update.CallbackQuery.Message!.Chat.Id;
+            var messageId = update.CallbackQuery.Message.Id;
+            var text = update.CallbackQuery.Message.Text;
+            await _botClient.EditMessageReplyMarkup(chatId, messageId, null); // пытаюсь скрыть клавиатуру, не работает. Почему?
             _botClient.OnError -= OnError;
             _botClient.OnMessage -= OnMessage;
             _botClient.OnUpdate -= OnUpdate;

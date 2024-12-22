@@ -27,7 +27,16 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             if (update.CallbackQuery!.Data == "Готово")
             {
+                // будет сохранение в БД
+                var chatId = update.CallbackQuery.Message!.Chat.Id;
+                var messageId = update.CallbackQuery.Message.Id;
+                await _botClient.SendMessage(chatId, BotPhrases.Done);
+                await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null); // пытаюсь скрыть клавиатуру, не работает. Почему?
                 return;
+            }
+            if (update.CallbackQuery.Data == "Редактировать")
+            {
+                _trip = new Trip();
             }
             var messageList = new List<string>()
             {
@@ -64,7 +73,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 var tripText = GetTripText(outPutLine, userName!);
                 var photo = _trip.Photo;
                 await _botClient.SendPhoto(message.Chat.Id, photo, tripText, replyMarkup: inlineMarkup);
-                //сохранить в БД
                 return;
             }
             await _botClient.SendMessage(message.Chat.Id, outPutLine);
