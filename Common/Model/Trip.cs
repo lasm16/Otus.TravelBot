@@ -1,13 +1,14 @@
 ﻿namespace Common.Model
 {
-    public class Trip(Guid id, DateTime dateTimeStart, DateTime dateTimeEnd, string discription, byte[]? picture)
+    public class Trip
     {
-        public Guid Id { get; private set; } = id;
-        public DateTime DateStart { get; set; } = dateTimeStart;
-        public DateTime DateEnd { get; set; } = dateTimeEnd;
-        public string Description { get; set; } = discription;
-        public byte[]? Picture { get; set; } = picture;
-        public TripStatus Status { get; set; } = TripStatus.Review;
+        public Guid Id { get; set; }
+        public string City { get; set; }
+        public string DateStart { get; set; }
+        public string DateEnd { get; set; }
+        public string Description { get; set; }
+        public string Photo { get; set; }
+        public TripStatus Status { get; set; }
     }
 
     public enum TripStatus
