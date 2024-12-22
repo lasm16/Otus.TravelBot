@@ -29,9 +29,15 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
-            var message = GetAgreementMessage();
-            await _botClient.SendMessage(update.CallbackQuery.Message!.Chat.Id, message.ToString());
-            await _botClient.SendMessage(update.CallbackQuery.Message.Chat.Id, BotPhrases.EnterCity);
+            var messageList = new List<string>()
+            {
+                GetAgreementMessage(),
+                BotPhrases.EnterCity
+            };
+            foreach (var message in messageList)
+            {
+                await _botClient.SendMessage(update.CallbackQuery.Message!.Chat.Id, message);
+            }
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
@@ -75,7 +81,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             return message.ToString();
         }
 
-        private static StringBuilder GetAgreementMessage()
+        private static string GetAgreementMessage()
         {
             var message = new StringBuilder();
             message.Append(BotPhrases.Agreement);
@@ -84,7 +90,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             message.Append(BotPhrases.SuggestEndDate);
             message.Append(BotPhrases.SuggestDescription);
             message.Append(BotPhrases.SuggestPhoto);
-            return message;
+            return message.ToString();
         }
 
         private (bool isFilled, string outPutLine) FillTrip(string inputText)
