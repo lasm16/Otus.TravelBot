@@ -1,19 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-namespace Common.Bot
+﻿namespace Common.Data
 {
     public class BotPhrases
     {
-        public const string Welcome = "Добро подаловать в прототип бота для ТГ";
-        public const string Role = "Выберите свою роль: админ или пользователь";
-        public const string AvailableActions = "Список доступных действий: ";
+        public const string Agreement = "Для того чтобы ваш пост был размещён в группе он должен соответствовать следующему описанию: \r\n";
+        public const string SuggestCity = "1) Город, который планируете посетить. \r\n";
+        public const string SuggestStartDate = "2) Предполагаемая дата начала поездки. \r\n";
+        public const string SuggestEndDate = "3) Предполагаемая дата окончания поездки. \r\n";
+        public const string SuggestDescription = "4) Краткое описание плана вашего путешествия. \r\n";
+        public const string SuggestPhoto = "5) Ваше фото. \r\n";
+        public const string SuggestLinkVk = "6) Реальный аккаунт ВК (посты от фейк аккаунтов и закрытыми профилями не публикуем. Нужно только для проверки админу)";
 
-        public const string Agreement = "Для того чтобы ваш пост был размещён в группе он должен соответствовать следующему описанию:";
-        public const string SuggestStartDate = "1) Предполагаемую дату начала поездки в формате ДД.ММ.ГГГГ: ";
-        public const string SuggestEndDate = "2) Предполагаемую дату окончания поездки в формате ДД.ММ.ГГГГ: ";
-        public const string Description = "3) краткое описание плана по вашему путешествию.";
-        public const string Photo = "4) ваше фото.";
-        public const string LinkVk = "5) реальный аккаунт ВК (посты от фейк аккаунтов и закрытыми профилями не публикуем. Нужно только для проверки админу)";
+        public const string EnterCity = "Введите город, который планируете посетить: \r\n";
+        public const string EnterStartDate = "Введите предполагаемую дату начала поездки в формате ДД.ММ.ГГГГ: \r\n";
+        public const string EnterEndDate = "Введите предполагаемую дату окончания поездки в формате ДД.ММ.ГГГГ: \r\n";
+        public const string EnterDescription = "Введите краткое описание плана вашего путешествия: \r\n";
+        public const string EnterPhoto = "Отправьте ваше фото: \r\n";
+        public const string ConfirmTrip = "Вот ваш пост! Подтвердите или отредактируйте его:";
         public const string Done = "Почти все готово! После проверки сообщения админстрацией ваш пост будет опубликован!";
 
         public const string SuggestDate = "Введите дату предполагаемой поездки: ";

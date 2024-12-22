@@ -1,10 +1,10 @@
 ﻿namespace Common.Services
 {
     /// <summary>
-    /// Сервис, запусакающий нужный сценарий работы бота
+    /// Сервис, запусакающий бота
     /// </summary>
     public interface IBotService
     {
-        public void Start();
+        public Task StartBotAsync();
     }
 }

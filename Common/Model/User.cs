@@ -1,12 +1,12 @@
 ﻿namespace Common.Model
 {
-    public class User(Guid id, string name, string linkTg, UserType userType)
+    public class User
     {
-        public Guid Id { get; private set; } = id;
-        public string Name { get; private set; } = name;
-        public string LinkTg { get; private set; } = linkTg;
-        public UserType UserType { get; private set; } = userType;
-        public List<Trip> Trips { get; set; }
+        public long Id { get; set; }
+        public string? Name { get; set; }
+        public string? LinkTg { get; set; }
+        public UserType UserType { get; set; }
+        public List<Trip>? Trips { get; set; }
     }
 
     public enum UserType
