@@ -94,12 +94,12 @@ namespace TelegramBot.Business.Scenarios
 
         private void CheckRole(Message message)
         {
-            var tgUser = message.From;
-            var user = GetUser(tgUser!); // здесь должна быть проверка роли админ/юзер через значение в бд
             if (_botRole != null)
             {
                 return;
             }
+            var tgUser = message.From;
+            var user = GetUser(tgUser!); // здесь должна быть проверка роли админ/юзер через значение в бд
             if (UserType.Admin == user.UserType)
             {
                 SetAdminActions();
