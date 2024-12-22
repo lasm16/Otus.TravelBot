@@ -54,22 +54,24 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                     .AddButton("Готово", "Готово")
                     .AddButton("Редактировать", "Редактировать");
 
-                var tripText = GetTripText(outPutLine);
+                var userName = message.Chat.Username;
+                var tripText = GetTripText(outPutLine, userName!);
                 var photo = _trip.Photo;
-                await _botClient.SendPhoto(message.Chat.Id, photo,  tripText, replyMarkup: inlineMarkup);
+                await _botClient.SendPhoto(message.Chat.Id, photo, tripText, replyMarkup: inlineMarkup);
                 //сохранить в БД
                 return;
             }
             await _botClient.SendMessage(message.Chat.Id, outPutLine);
         }
 
-        private string GetTripText(string text)
+        private string GetTripText(string text, string userName)
         {
             var message = new StringBuilder(text + "\r\n");
-            message.Append(_trip.City + "\r\n");
-            message.Append(_trip.DateStart + "\r\n");
-            message.Append(_trip.DateEnd + "\r\n");
-            message.Append(_trip.Description + "\r\n");
+            message.Append("Планирую посетить: " + _trip.City + "\r\n");
+            message.Append("Дата начала поездки: " + _trip.DateStart + "\r\n");
+            message.Append("Дата окончания поездки: " + _trip.DateEnd + "\r\n");
+            message.Append("Описание: \r\n" + _trip.Description + "\r\n");
+            message.Append("@" + userName);
             return message.ToString();
         }
 
