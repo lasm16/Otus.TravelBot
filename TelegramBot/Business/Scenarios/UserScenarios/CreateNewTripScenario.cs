@@ -25,13 +25,13 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnUpdate(Update update)
         {
-            if (update.CallbackQuery.Data == "Готово")
+            if (update.CallbackQuery!.Data == "Готово")
             {
                 return;
             }
             var message = GetAgreementMessage();
-            await _botClient!.SendMessage(update.CallbackQuery.Message.Chat.Id, message.ToString());
-            await _botClient!.SendMessage(update.CallbackQuery.Message.Chat.Id, BotPhrases.EnterCity);
+            await _botClient.SendMessage(update.CallbackQuery.Message!.Chat.Id, message.ToString());
+            await _botClient.SendMessage(update.CallbackQuery.Message.Chat.Id, BotPhrases.EnterCity);
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)

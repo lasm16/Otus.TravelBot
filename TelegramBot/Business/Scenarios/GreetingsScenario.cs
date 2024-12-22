@@ -30,9 +30,9 @@ namespace TelegramBot.Business.Scenarios
             {
                 return;
             }
-            var action = update.CallbackQuery.Data;
+            var action = update.CallbackQuery!.Data;
             var message = update.CallbackQuery.Message;
-            var scenario = _botRole!.Actions.FirstOrDefault(t => t.Key == action).Value;
+            var scenario = _botRole!.Actions!.FirstOrDefault(t => t.Key == action).Value;
             _botClient.OnError -= OnError;
             _botClient.OnMessage -= OnMessage;
             _botClient.OnUpdate -= OnUpdate;
@@ -63,7 +63,7 @@ namespace TelegramBot.Business.Scenarios
             var currentUser = message.From!.FirstName + " " + message.From.LastName;
             var greetingsText = $"Приветствую тебя, {currentUser}! Ты можешь выложить пост о планируемой поездке или найти попутчика.";
 
-            var actions = _botRole.Actions.Keys;
+            var actions = _botRole!.Actions!.Keys;
             var inlineMarkup = new InlineKeyboardMarkup();
             foreach (var item in actions)
             {
