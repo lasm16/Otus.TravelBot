@@ -48,7 +48,7 @@ namespace TelegramBot.Business.Scenarios
         {
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
-            await _botClient.EditMessageReplyMarkup(chatId, messageId, null); // пытаюсь скрыть клавиатуру, не работает. Почему?
+            await _botClient.EditMessageReplyMarkup(chatId, messageId, null);
         }
 
         private void UnsubscriveEvents()

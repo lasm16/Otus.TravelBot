@@ -31,7 +31,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 // будет сохранение в БД. Сделаю позже сохранение в файл
                 var messageId = update.CallbackQuery.Message.Id;
                 await _botClient.SendMessage(chatId, BotPhrases.Done);
-                await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null); // пытаюсь скрыть клавиатуру, не работает. Почему?
+                await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
                 UnsubscriveEvents();
                 var scenario = new GreetingsScenario(_botClient);
                 scenario.DoAction();
