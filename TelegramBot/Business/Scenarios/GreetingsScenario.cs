@@ -1,4 +1,5 @@
-﻿using Common.Model;
+﻿using Common.Data;
+using Common.Model;
 using Common.Model.Bot;
 using Serilog;
 using Telegram.Bot;
@@ -19,6 +20,11 @@ namespace TelegramBot.Business.Scenarios
 
         //заменить на инициализацию в конструкторе?
         public void Launch()
+        {
+            SubscriveEvents();
+        }
+
+        private void SubscriveEvents()
         {
             _botClient.OnError += OnError;
             _botClient.OnMessage += OnMessage;
@@ -75,7 +81,7 @@ namespace TelegramBot.Business.Scenarios
             if (!action.Equals("/start"))
             {
                 Log.Error("Некорректно указан сценарий!");
-                await _botClient!.SendMessage(message.Chat.Id, $"Я не знаю этой команды...");
+                await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
                 return;
             }
 
@@ -88,8 +94,8 @@ namespace TelegramBot.Business.Scenarios
             {
                 inlineMarkup.AddButton(item, item);
             }
-
-            await _botClient!.SendMessage(message.Chat.Id, greetingsText!, replyMarkup: inlineMarkup);
+            var chatId = message.Chat.Id;
+            await _botClient.SendMessage(chatId, greetingsText!, replyMarkup: inlineMarkup);
         }
 
         private void CheckRole(Message message)

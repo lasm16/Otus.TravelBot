@@ -3,14 +3,13 @@ using Common.Model;
 using Common.Model.Bot;
 using Serilog;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Unicode;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Business.Utils;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
@@ -55,17 +54,13 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
         }
 
-        // удалю когда будет БД
+        // удалю, когда будет БД
         private async Task SaveToFile()
         {
-            var options = new JsonSerializerOptions
-            {
-                Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
-                WriteIndented = true
-            };
-            string json = JsonSerializer.Serialize(_trip, options);
+            var options = JsonUtils.GetSerializerOptions();
+            var json = JsonSerializer.Serialize(_trip, options);
 
-            using var writer = new StreamWriter("trips.json", true, Encoding.UTF8);
+            using var writer = new StreamWriter("new_trips.json", true, Encoding.UTF8);
             await writer.WriteLineAsync(json);
         }
 
