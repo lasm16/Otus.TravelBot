@@ -5,7 +5,7 @@ namespace Common.Model
     /// <summary>
     /// Потому удалю, когда будет БД
     /// </summary>
-    public class TripsRepository
+    public class Repository
     {
         public static List<Trip>? Trips => GetFromFile();
 
