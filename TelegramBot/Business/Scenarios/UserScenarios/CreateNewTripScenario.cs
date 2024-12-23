@@ -3,6 +3,9 @@ using Common.Model;
 using Common.Model.Bot;
 using Serilog;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -28,11 +31,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             if (update.CallbackQuery!.Data == "Готово")
             {
-                // будет сохранение в БД. Сделаю позже сохранение в файл
+                await SaveToFile();
                 var messageId = update.CallbackQuery.Message.Id;
                 await _botClient.SendMessage(chatId, BotPhrases.Done);
                 await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
-                UnsubscriveEvents();
+                UnsubscribeEvents();
                 var scenario = new GreetingsScenario(_botClient);
                 scenario.DoAction();
                 return;
@@ -50,6 +53,20 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 await _botClient.SendMessage(chatId, message);
             }
+        }
+
+        // удалю когда будет БД
+        private async Task SaveToFile()
+        {
+            var options = new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
+                WriteIndented = true
+            };
+            string json = JsonSerializer.Serialize(_trip, options);
+
+            using var writer = new StreamWriter("trips.json", true, Encoding.UTF8);
+            await writer.WriteLineAsync(json);
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
@@ -142,7 +159,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             return (true, BotPhrases.ConfirmTrip);
         }
 
-        private void UnsubscriveEvents()
+        private void UnsubscribeEvents()
         {
             _botClient.OnError -= OnError;
             _botClient.OnMessage -= OnMessage;

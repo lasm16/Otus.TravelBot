@@ -33,7 +33,7 @@ namespace TelegramBot.Business.Scenarios
             }
             var scenario = GetScenario(update);
             await RemoveInlineKeyboard(update);
-            UnsubscriveEvents();
+            UnsubscribeEvents();
             scenario.DoAction();
         }
 
@@ -51,7 +51,7 @@ namespace TelegramBot.Business.Scenarios
             await _botClient.EditMessageReplyMarkup(chatId, messageId, null);
         }
 
-        private void UnsubscriveEvents()
+        private void UnsubscribeEvents()
         {
             _botClient.OnError -= OnError;
             _botClient.OnMessage -= OnMessage;
