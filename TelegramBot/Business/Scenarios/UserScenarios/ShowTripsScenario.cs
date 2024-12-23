@@ -57,18 +57,18 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 var userName = update.CallbackQuery!.From!.Username; // Переделать на получение из файла/БД
                 var text = GetTripText(trip, userName);
                 var inlineMarkup = new InlineKeyboardMarkup()
-                    .AddButton("Предыдущий", "Предыдущий")
+                    .AddButton("Назад", "Назад")
                     .AddButton("Далее", "Далее");
                 if (counter == _trips.Count - 1)
                 {
                     inlineMarkup = new InlineKeyboardMarkup()
-                                    .AddButton("Предыдущий", "Предыдущий");
+                                    .AddButton("Назад", "Назад");
                 }
                 var messageId = update.CallbackQuery.Message.Id;
                 await _botClient.DeleteMessage(chatId, messageId);
                 await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
             }
-            if (update.CallbackQuery.Data.Equals("Предыдущий"))
+            if (update.CallbackQuery.Data.Equals("Назад"))
             {
                 counter--;
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
@@ -77,7 +77,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 var userName = update.CallbackQuery!.From!.Username; // Переделать на получение из файла/БД
                 var text = GetTripText(trip, userName);
                 var inlineMarkup = new InlineKeyboardMarkup()
-                    .AddButton("Предыдущий", "Предыдущий")
+                    .AddButton("Назад", "Назад")
                     .AddButton("Далее", "Далее");
                 if (counter == 0)
                 {
