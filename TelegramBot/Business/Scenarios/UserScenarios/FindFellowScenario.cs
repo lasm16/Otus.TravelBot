@@ -5,7 +5,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 {
     public class FindFellowScenario(TelegramBotClient botClient) : IScenario
     {
-        public void DoAction()
+        public void Launch()
         {
             throw new NotImplementedException();
         }

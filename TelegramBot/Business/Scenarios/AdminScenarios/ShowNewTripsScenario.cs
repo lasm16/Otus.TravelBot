@@ -5,7 +5,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 {
     public class ShowNewTripsScenario(TelegramBotClient botClient) : IScenario
     {
-        public void DoAction()
+        public void Launch()
         {
             throw new NotImplementedException();
         }

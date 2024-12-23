@@ -19,7 +19,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private Trip _trip = new();
         private TelegramBotClient _botClient = botClient;
 
-        public void DoAction()
+        public void Launch()
         {
             _botClient.OnError += OnError;
             _botClient.OnMessage += OnMessage;
@@ -37,7 +37,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
                 UnsubscribeEvents();
                 var scenario = new GreetingsScenario(_botClient);
-                scenario.DoAction();
+                scenario.Launch();
                 return;
             }
             if (update.CallbackQuery.Data == "Редактировать")

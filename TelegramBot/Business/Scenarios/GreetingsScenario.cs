@@ -18,7 +18,7 @@ namespace TelegramBot.Business.Scenarios
         private readonly TelegramBotClient _botClient = botClient;
 
         //заменить на инициализацию в конструкторе?
-        public void DoAction()
+        public void Launch()
         {
             _botClient.OnError += OnError;
             _botClient.OnMessage += OnMessage;
@@ -34,7 +34,7 @@ namespace TelegramBot.Business.Scenarios
             var scenario = GetScenario(update);
             await RemoveInlineKeyboard(update);
             UnsubscribeEvents();
-            scenario.DoAction();
+            scenario.Launch();
         }
 
         private IScenario GetScenario(Update update)

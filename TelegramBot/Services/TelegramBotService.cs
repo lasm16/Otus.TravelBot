@@ -20,7 +20,7 @@ namespace TelegramBot.Services
             var me = await _botClient.GetMe();
 
             var scenario = new GreetingsScenario(_botClient);
-            scenario.DoAction();
+            scenario.Launch();
 
             Console.WriteLine($"@{me!.Username} is running... Press Esc to terminate");
             while (Console.ReadKey(true).Key != ConsoleKey.Escape) ;
