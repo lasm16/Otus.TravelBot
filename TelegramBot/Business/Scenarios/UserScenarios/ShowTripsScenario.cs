@@ -13,7 +13,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 {
     public class ShowTripsScenario(TelegramBotClient botClient) : IScenario
     {
-        private Trip? _currenTrip;
+        private Trip? _currentTrip;
         private List<Trip>? _trips = Repository.Trips;
         private readonly TelegramBotClient _botClient = botClient;
 
@@ -33,7 +33,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                     return;
                 }
                 var trip = _trips[0];
-                _currenTrip = trip;
+                _currentTrip = trip;
                 await _botClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({_trips.Count}):");
                 var photo = trip.Photo;
                 var userName = update.CallbackQuery!.From!.Username; // Переделать на получение из файла/БД
@@ -51,10 +51,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             if (update.CallbackQuery.Data.Equals("Далее"))
             {
-                var index = _trips.IndexOf(_currenTrip) + 1;
+                var index = _trips.IndexOf(_currentTrip) + 1;
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
                 var trip = _trips[index];
-                _currenTrip = trip;
+                _currentTrip = trip;
                 var photo = trip.Photo;
                 var userName = update.CallbackQuery!.From!.Username; // Переделать на получение из файла/БД
                 var text = GetTripText(trip, userName);
@@ -76,10 +76,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             if (update.CallbackQuery.Data.Equals("Назад"))
             {
-                var index = _trips.IndexOf(_currenTrip) - 1;
+                var index = _trips.IndexOf(_currentTrip) - 1;
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
                 var trip = _trips[index];
-                _currenTrip = trip;
+                _currentTrip = trip;
                 var photo = trip.Photo;
                 var userName = update.CallbackQuery!.From!.Username; // Переделать на получение из файла/БД
                 var text = GetTripText(trip, userName);
@@ -101,7 +101,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             if (update.CallbackQuery.Data.Equals("Удалить"))
             {
-                var tripToDelete = _currenTrip;
+                var tripToDelete = _currentTrip;
                 var index = _trips.IndexOf(tripToDelete);
                 _trips.Remove(tripToDelete);
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
@@ -117,7 +117,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                     index--;
                 }
                 var trip = _trips[index];
-                _currenTrip = trip;
+                _currentTrip = trip;
                 var photo = trip.Photo;
                 var userName = update.CallbackQuery!.From!.Username; // Переделать на получение из файла/БД
                 var text = GetTripText(trip, userName);
