@@ -15,7 +15,7 @@ namespace TelegramBot.Business.Scenarios
 {
     public class GreetingsScenario(TelegramBotClient botClient) : IScenario
     {
-        private IBotRole? _botRole;
+        private IRole? _user;
         private readonly TelegramBotClient _botClient = botClient;
 
         //public Common.Model.User User { get; set; }
@@ -49,7 +49,7 @@ namespace TelegramBot.Business.Scenarios
         {
             var action = update.CallbackQuery!.Data;
             // кидает NRE после нажатия кнопки "Готово" у подтверждения поездки
-            return _botRole!.Actions!.FirstOrDefault(t => t.Key == action).Value;
+            return _user!.Actions!.FirstOrDefault(t => t.Key == action).Value;
         }
 
         private async Task RemoveInlineKeyboard(Update update)
@@ -90,7 +90,7 @@ namespace TelegramBot.Business.Scenarios
             var currentUser = message.From!.FirstName + " " + message.From.LastName;
             var greetingsText = $"Приветствую тебя, {currentUser}! Ты можешь выложить пост о планируемой поездке или найти попутчика.";
 
-            var actions = _botRole!.Actions!.Keys;
+            var actions = _user!.Actions!.Keys;
             var inlineMarkup = new InlineKeyboardMarkup();
             foreach (var item in actions)
             {
@@ -102,7 +102,7 @@ namespace TelegramBot.Business.Scenarios
 
         private void CheckRole(Message message)
         {
-            if (_botRole != null)
+            if (_user != null)
             {
                 return;
             }
@@ -140,7 +140,7 @@ namespace TelegramBot.Business.Scenarios
 
         private void SetUserActions()
         {
-            _botRole = new UserRole
+            _user = new UserRole
             {
                 Actions = new Dictionary<string, IScenario>
                     {
@@ -153,7 +153,7 @@ namespace TelegramBot.Business.Scenarios
 
         private void SetAdminActions()
         {
-            _botRole = new AdminRole
+            _user = new AdminRole
             {
                 Actions = new Dictionary<string, IScenario>
                     {

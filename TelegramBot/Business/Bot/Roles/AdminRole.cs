@@ -2,7 +2,7 @@
 
 namespace TelegramBot.Business.Bot.Roles
 {
-    internal class AdminRole() : IBotRole
+    internal class AdminRole() : IRole
     {
         public Dictionary<string, IScenario>? Actions { get; set; }
     }

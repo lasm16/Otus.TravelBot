@@ -2,7 +2,7 @@
 
 namespace TelegramBot.Business.Bot.Roles
 {
-    public class UserRole() : IBotRole
+    public class UserRole() : IRole
     {
         public Dictionary<string, IScenario>? Actions { get; set; }
     }
