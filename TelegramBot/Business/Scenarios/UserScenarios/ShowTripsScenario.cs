@@ -11,11 +11,11 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
-    public class ShowTripsScenario(TelegramBotClient botClient) : IScenario
+    public class ShowTripsScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
     {
         private Trip? _currentTrip;
+        private Post? _post = GetPost(user);
         private static List<Post> _posts = Repository.Posts;
-        private List<Trip>? _trips;
         private readonly TelegramBotClient _botClient = botClient;
 
         public void Launch()
@@ -25,26 +25,26 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnUpdate(Update update)
         {
-            var userName = update.CallbackQuery.From.Username;
-            _trips = GetTrips(userName);
+            var userName = user.UserName;
+            var trips = GetTrips(_post);
             if (update.CallbackQuery.Data.Equals("Мои поездки"))
             {
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                if (_trips.Count == 0)
+                if (trips.Count == 0)
                 {
                     await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                     return;
                 }
-                var trip = _trips[0];
+                var trip = trips[0];
                 _currentTrip = trip;
-                await _botClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({_trips.Count}):");
+                await _botClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({trips.Count}):");
                 var photo = trip.Photo;
                 var text = GetTripText(trip, userName);
 
                 var inlineMarkup = new InlineKeyboardMarkup()
                     .AddButton("Удалить", "Удалить");
 
-                if (_trips.Count > 1)
+                if (trips.Count > 1)
                 {
                     inlineMarkup.AddButton("Далее", "Далее");
                 }
@@ -52,9 +52,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             if (update.CallbackQuery.Data.Equals("Далее"))
             {
-                var index = _trips.IndexOf(_currentTrip) + 1;
+                var index = trips.IndexOf(_currentTrip) + 1;
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                var trip = _trips[index];
+                var trip = trips[index];
                 _currentTrip = trip;
                 var photo = trip.Photo;
                 var text = GetTripText(trip, userName);
@@ -62,7 +62,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                     .AddButton("Удалить", "Удалить")
                     .AddButton("Назад", "Назад")
                     .AddButton("Далее", "Далее");
-                if (index == _trips.Count - 1)
+                if (index == trips.Count - 1)
                 {
                     inlineMarkup = new InlineKeyboardMarkup()
                         .AddButton("Удалить", "Удалить")
@@ -74,9 +74,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             if (update.CallbackQuery.Data.Equals("Назад"))
             {
-                var index = _trips.IndexOf(_currentTrip) - 1;
+                var index = trips.IndexOf(_currentTrip) - 1;
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                var trip = _trips[index];
+                var trip = trips[index];
                 _currentTrip = trip;
                 var photo = trip.Photo;
                 var text = GetTripText(trip, userName);
@@ -97,44 +97,44 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             if (update.CallbackQuery.Data.Equals("Удалить"))
             {
                 var tripToDelete = _currentTrip;
-                var index = _trips.IndexOf(tripToDelete);
-                _trips.Remove(tripToDelete);
+                var index = trips.IndexOf(tripToDelete);
+                trips.Remove(tripToDelete);
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
                 var messageId = update.CallbackQuery.Message.Id;
                 await _botClient.DeleteMessage(chatId, messageId);
-                if (_trips.Count == 0)
+                if (trips.Count == 0)
                 {
                     await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                     return;
                 }
-                if (_trips.Count == index)
+                if (trips.Count == index)
                 {
                     index--;
                 }
-                var trip = _trips[index];
+                var trip = trips[index];
                 _currentTrip = trip;
                 var photo = trip.Photo;
                 var text = GetTripText(trip, userName);
                 InlineKeyboardMarkup inlineMarkup = null;
-                if (_trips.Count == 1)
+                if (trips.Count == 1)
                 {
                     inlineMarkup = new InlineKeyboardMarkup()
                         .AddButton("Удалить", "Удалить");
                 }
-                if (_trips.Count > 1 && index == 0)
+                if (trips.Count > 1 && index == 0)
                 {
                     inlineMarkup = new InlineKeyboardMarkup()
                         .AddButton("Удалить", "Удалить")
                         .AddButton("Далее", "Далее");
                 }
-                if (_trips.Count > 1 && index != 0)
+                if (trips.Count > 1 && index != 0)
                 {
                     inlineMarkup = new InlineKeyboardMarkup()
                         .AddButton("Удалить", "Удалить")
                         .AddButton("Назад", "Назад")
                         .AddButton("Далее", "Далее");
                 }
-                if (_trips.Count > 1 && index == _trips.Count - 1)
+                if (trips.Count > 1 && index == trips.Count - 1)
                 {
                     inlineMarkup = new InlineKeyboardMarkup()
                         .AddButton("Назад", "Назад")
@@ -172,19 +172,37 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private string GetTripText(Trip trip, string userName)
         {
+            var status = GetStatus(trip.Status);
             var message = new StringBuilder();
+            message.Append("Статус поездки: " + status + "\r\n");
             message.Append("Планирую посетить: " + trip.City + "\r\n");
             message.Append("Дата начала поездки: " + trip.DateStart + "\r\n");
             message.Append("Дата окончания поездки: " + trip.DateEnd + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
-            message.Append("@" + userName);
+            message.Append("@" + _post.User.UserName);
             return message.ToString();
         }
 
-        private static List<Trip>? GetTrips(string userName)
+        private string GetStatus(TripStatus status)
         {
-            var post = _posts.Where(x => x.User.UserName == userName).FirstOrDefault();
-            return post.Trips.Where(x => x.Status == TripStatus.New).ToList();
+            return status switch
+            {
+                TripStatus.New => "на рассмотрении администраицией.",
+                TripStatus.Accepted => "одобрено администрацией. Ожидаем поездки.",
+                TripStatus.Declined => "отклонена администраицей. Удалите пост и создайте новый.",
+                TripStatus.OnTheWay => "в пути.",
+                TripStatus.Ended => "поездка завершена.",
+                _ => "Unknown",
+            };
+        }
+
+        private static List<Trip>? GetTrips(Post post) =>
+            post.Trips.Where(x => x.Status == TripStatus.New).ToList();
+
+        private static Post? GetPost(Common.Model.User user)
+        {
+            var userName = user.UserName;
+            return _posts.Where(x => x.User.UserName == userName).FirstOrDefault();
         }
     }
 }

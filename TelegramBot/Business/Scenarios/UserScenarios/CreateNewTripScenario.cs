@@ -13,9 +13,10 @@ using TelegramBot.Business.Utils;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
-    public class CreateNewTripScenario(TelegramBotClient botClient) : IScenario
+    public class CreateNewTripScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
     {
         private Trip _trip = new();
+        private Common.Model.User _user = user;
         private TelegramBotClient _botClient = botClient;
 
         public void Launch()
@@ -28,8 +29,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             if (update.CallbackQuery!.Data == "Готово")
             {
-                var user = update.CallbackQuery.From.Username;
-                await SaveToFile(user);
+                await SaveToFile();
                 var messageId = update.CallbackQuery.Message.Id;
                 await _botClient.SendMessage(chatId, BotPhrases.Done);
                 await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
@@ -54,10 +54,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         }
 
         // удалю, когда будет БД
-        private async Task SaveToFile(string user)
+        private async Task SaveToFile()
         {
             var post = new Post();
-            post.User.UserName = user;
+            post.User = _user;
+            post.Trips = [];
             post.Trips.Add(_trip);
             var options = JsonUtils.GetSerializerOptions();
             var json = JsonSerializer.Serialize(post, options);

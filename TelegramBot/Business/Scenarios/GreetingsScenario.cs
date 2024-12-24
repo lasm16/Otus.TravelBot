@@ -15,7 +15,8 @@ namespace TelegramBot.Business.Scenarios
 {
     public class GreetingsScenario(TelegramBotClient botClient) : IScenario
     {
-        private IRole? _user;
+        private IRole _role;
+        private Common.Model.User _user;
         private readonly TelegramBotClient _botClient = botClient;
 
         //public Common.Model.User User { get; set; }
@@ -49,7 +50,7 @@ namespace TelegramBot.Business.Scenarios
         {
             var action = update.CallbackQuery!.Data;
             // кидает NRE после нажатия кнопки "Готово" у подтверждения поездки
-            return _user!.Actions!.FirstOrDefault(t => t.Key == action).Value;
+            return _role!.Actions!.FirstOrDefault(t => t.Key == action).Value;
         }
 
         private async Task RemoveInlineKeyboard(Update update)
@@ -90,7 +91,7 @@ namespace TelegramBot.Business.Scenarios
             var currentUser = message.From!.FirstName + " " + message.From.LastName;
             var greetingsText = $"Приветствую тебя, {currentUser}! Ты можешь выложить пост о планируемой поездке или найти попутчика.";
 
-            var actions = _user!.Actions!.Keys;
+            var actions = _role!.Actions!.Keys;
             var inlineMarkup = new InlineKeyboardMarkup();
             foreach (var item in actions)
             {
@@ -102,17 +103,17 @@ namespace TelegramBot.Business.Scenarios
 
         private void CheckRole(Message message)
         {
-            if (_user != null)
+            if (_role != null)
             {
                 return;
             }
             var tgUser = message.From;
-            var user = GetUser(tgUser!); // здесь должна быть проверка роли админ/юзер через значение в бд
-            if (UserType.Admin == user.UserType)
+            _user = GetUser(tgUser!); // здесь должна быть проверка роли админ/юзер через значение в бд
+            if (UserType.Admin == _user.UserType)
             {
                 SetAdminActions();
             }
-            else if (UserType.SimpleUser == user.UserType)
+            else if (UserType.SimpleUser == _user.UserType)
             {
                 SetUserActions();
             }
@@ -140,12 +141,12 @@ namespace TelegramBot.Business.Scenarios
 
         private void SetUserActions()
         {
-            _user = new UserRole
+            _role = new UserRole
             {
                 Actions = new Dictionary<string, IScenario>
                     {
-                        { "Новая поездка",      new CreateNewTripScenario(_botClient) },
-                        { "Мои поездки",        new ShowTripsScenario(_botClient) },
+                        { "Новая поездка",      new CreateNewTripScenario(_botClient, _user) },
+                        { "Мои поездки",        new ShowTripsScenario(_botClient, _user) },
                         { "Найти попутчика",    new FindFellowScenario(_botClient) }
                     }
             };
@@ -153,13 +154,13 @@ namespace TelegramBot.Business.Scenarios
 
         private void SetAdminActions()
         {
-            _user = new AdminRole
+            _role = new AdminRole
             {
                 Actions = new Dictionary<string, IScenario>
                     {
                         { "Новые посты",        new ShowNewPostsScenario(_botClient) },
-                        { "Новая поездка",      new CreateNewTripScenario(_botClient) },
-                        { "Мои поездки",        new ShowTripsScenario(_botClient) },
+                        { "Новая поездка",      new CreateNewTripScenario(_botClient, _user) },
+                        { "Мои поездки",        new ShowTripsScenario(_botClient, _user) },
                         { "Найти попутчика",    new FindFellowScenario(_botClient) }
                     }
             };
