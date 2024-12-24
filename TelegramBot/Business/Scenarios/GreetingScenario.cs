@@ -117,7 +117,7 @@ namespace TelegramBot.Business.Scenarios
             }
         }
 
-        private Common.Model.User GetUser(Telegram.Bot.Types.User user)
+        private static Common.Model.User GetUser(Telegram.Bot.Types.User user)
         {
             var nickName = user.Username;
             if (nickName == System.Configuration.ConfigurationManager.AppSettings["adminNickname"])

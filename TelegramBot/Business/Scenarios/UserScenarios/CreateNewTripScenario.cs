@@ -5,6 +5,7 @@ using Serilog;
 using System.Text;
 using System.Text.Json;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -26,22 +27,14 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnUpdate(Update update)
         {
+            var button = update.CallbackQuery.Data;
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
-            if (update.CallbackQuery!.Data == "Готово")
-            {
-                await SaveToFile();
-                var messageId = update.CallbackQuery.Message.Id;
-                await _botClient.SendMessage(chatId, BotPhrases.Done);
-                await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
-                UnsubscribeEvents();
-                var scenario = new GreetingScenario(_botClient);
-                scenario.Launch();
-                return;
-            }
-            if (update.CallbackQuery.Data == "Редактировать")
-            {
-                _trip = new Trip();
-            }
+            var messageId = update.CallbackQuery.Message.Id;
+            await ButtonClick(button, chatId, messageId);
+        }
+
+        private async Task SendMessageForNewTrip(long chatId)
+        {
             var messageList = new List<string>()
             {
                 GetAgreementMessage(),
@@ -51,6 +44,37 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 await _botClient.SendMessage(chatId, message);
             }
+        }
+
+        private async Task ButtonClick(string? button, long chatId, int messageId)
+        {
+            switch (button)
+            {
+                case "Готово":
+                    await FinishClick(chatId, messageId);
+                    break;
+                case "Редактировать":
+                    EditClick();
+                    await SendMessageForNewTrip(chatId);
+                    break;
+                case "Новая поездка":
+                    await SendMessageForNewTrip(chatId);
+                    break;
+                default:
+                    return;
+            }
+        }
+
+        private void EditClick() => _trip = new Trip();
+
+        private async Task FinishClick(long chatId, int messageId)
+        {
+            await SaveToFile();
+            await _botClient.SendMessage(chatId, BotPhrases.Done);
+            await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
+            UnsubscribeEvents();
+            var scenario = new GreetingScenario(_botClient);
+            scenario.Launch();
         }
 
         // удалю, когда будет БД
@@ -97,7 +121,16 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var photo = _trip.Photo;
             var userName = _user.UserName;
             var tripText = GetTripText(outPutLine, userName);
-            await _botClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup);
+            try
+            {
+                await _botClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup);
+            }
+            catch (ApiRequestException e)
+            {
+                Log.Error(e.Message);
+                await _botClient.SendMessage(chatId, BotPhrases.UploadPhotoError);
+                _trip.Photo = null;
+            }
         }
 
         private string GetTripText(string text, string userName)

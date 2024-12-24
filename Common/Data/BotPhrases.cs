@@ -23,9 +23,10 @@
         public const string TripsNotFound = "🤥 Поездки не найдены...";
 
         public const string SuggestDate = "Введите дату предполагаемой поездки: ";
-        public const string PostForVip = "Введите id поста, который хотите сделать VIP: ";
 
         public const string PostsFound = "Нашел новые посты";
         public const string PostsNotFound = "🤥 Посты не найдены...";
+
+        public const string UploadPhotoError = "Кажется, не удалось загрузить фотографию. Попробуй еще раз.";
     }
 }

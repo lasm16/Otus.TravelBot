@@ -26,89 +26,117 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnUpdate(Update update)
         {
+            var button = update.CallbackQuery.Data;
+            var chatId = update.CallbackQuery!.Message!.Chat.Id;
+            var messageId = update.CallbackQuery.Message.Id;
+            await ButtonClick(button, chatId, messageId);
+        }
+
+        private async Task ButtonClick(string? button, long chatId, int messageId)
+        {
+            switch (button)
+            {
+                case "Мои поездки":
+                    await MyTripsClick(chatId);
+                    break;
+                case "Далее": 
+                    await NextClick(chatId, messageId); 
+                    break;
+                case "Назад":
+                    await PreviousClick(chatId, messageId);
+                    break;
+                case "Удалить":
+                    await DeleteClick(chatId, messageId);
+                    break;
+                default: 
+                    return;
+            }
+        }
+
+        private async Task DeleteClick(long chatId, int messageId)
+        {
             var userName = user.UserName;
             var trips = GetTrips(_post);
-            if (update.CallbackQuery.Data.Equals("Мои поездки"))
+            var tripToDelete = _currentTrip;
+            var index = trips.IndexOf(tripToDelete);
+            trips.Remove(tripToDelete);
+            await _botClient.DeleteMessage(chatId, messageId);
+            if (trips.Count == 0)
             {
-                var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                if (trips.Count == 0)
-                {
-                    await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
-                    return;
-                }
-                var trip = trips[0];
-                _currentTrip = trip;
-                await _botClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({trips.Count}):");
-                var photo = trip.Photo;
-                var text = GetTripText(trip, userName);
+                await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
+                return;
+            }
+            if (trips.Count == index)
+            {
+                index--;
+            }
+            var trip = trips[index];
+            _currentTrip = trip;
+            var photo = trip.Photo;
+            var text = GetTripText(trip, userName);
+            var inlineMarkup = GetNavigationButtons(trips.Count, index);
+            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            //удалить из БД
+        }
 
-                var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить");
+        private async Task PreviousClick(long chatId, int messageId)
+        {
+            var userName = user.UserName;
+            var trips = GetTrips(_post);
+            var index = trips.IndexOf(_currentTrip) - 1;
+            var trip = trips[index];
+            _currentTrip = trip;
+            var photo = trip.Photo;
+            var text = GetTripText(trip, userName);
+            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
+            if (index == 0)
+            {
+                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Далее");
+            }
+            await _botClient.DeleteMessage(chatId, messageId);
+            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+        }
 
-                if (trips.Count > 1)
-                {
-                    inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Далее");
-                }
-                await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
-            }
-            if (update.CallbackQuery.Data.Equals("Далее"))
+        private async Task NextClick(long chatId, int messageId)
+        {
+            var userName = user.UserName;
+            var trips = GetTrips(_post);
+            var index = trips.IndexOf(_currentTrip) + 1;
+            var trip = trips[index];
+            _currentTrip = trip;
+            var photo = trip.Photo;
+            var text = GetTripText(trip, userName);
+            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
+            if (index == trips.Count - 1)
             {
-                var index = trips.IndexOf(_currentTrip) + 1;
-                var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                var trip = trips[index];
-                _currentTrip = trip;
-                var photo = trip.Photo;
-                var text = GetTripText(trip, userName);
-                var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
-                if (index == trips.Count - 1)
-                {
-                    inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад");
-                }
-                var messageId = update.CallbackQuery.Message.Id;
-                await _botClient.DeleteMessage(chatId, messageId);
-                await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад");
             }
-            if (update.CallbackQuery.Data.Equals("Назад"))
+            await _botClient.DeleteMessage(chatId, messageId);
+            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+        }
+
+        private async Task MyTripsClick(long chatId)
+        {
+            var userName = user.UserName;
+            var trips = GetTrips(_post);
+            if (trips.Count == 0)
             {
-                var index = trips.IndexOf(_currentTrip) - 1;
-                var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                var trip = trips[index];
-                _currentTrip = trip;
-                var photo = trip.Photo;
-                var text = GetTripText(trip, userName);
-                var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
-                if (index == 0)
-                {
-                    inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Далее");
-                }
-                var messageId = update.CallbackQuery.Message.Id;
-                await _botClient.DeleteMessage(chatId, messageId);
-                await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+                await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
+                return;
             }
-            if (update.CallbackQuery.Data.Equals("Удалить"))
+            var trip = trips[0];
+            _currentTrip = trip;
+            await _botClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({trips.Count}):");
+            var photo = trip.Photo;
+            var text = GetTripText(trip, userName);
+
+            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить");
+
+            if (trips.Count > 1)
             {
-                var tripToDelete = _currentTrip;
-                var index = trips.IndexOf(tripToDelete);
-                trips.Remove(tripToDelete);
-                var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                var messageId = update.CallbackQuery.Message.Id;
-                await _botClient.DeleteMessage(chatId, messageId);
-                if (trips.Count == 0)
-                {
-                    await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
-                    return;
-                }
-                if (trips.Count == index)
-                {
-                    index--;
-                }
-                var trip = trips[index];
-                _currentTrip = trip;
-                var photo = trip.Photo;
-                var text = GetTripText(trip, userName);
-                var inlineMarkup = GetNavigationButtons(trips.Count, index);
-                await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
-                //удалить из БД
+                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Далее");
             }
+            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
         }
 
         private static InlineKeyboardMarkup? GetNavigationButtons(int count, int index)
@@ -141,7 +169,20 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnMessage(Message message, UpdateType type)
         {
-            throw new NotImplementedException();
+            if (message.Text is null)
+            {
+                return;
+            }
+            var action = message.Text;
+            if (!action.Equals("/start"))
+            {
+                Log.Error("Некорректно указан сценарий!");
+                await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
+                return;
+            }
+            UnsubscribeEvents();
+            var scenario = new GreetingScenario(_botClient);
+            scenario.Launch();
         }
 
         private void SubscribeEvents()
