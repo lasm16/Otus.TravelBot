@@ -1,6 +1,6 @@
 ﻿using Common.Model.Bot;
 
-namespace TelegramBot.Business.Bots.Roles
+namespace TelegramBot.Business.Bot.Roles
 {
     public class UserRole() : IBotRole
     {

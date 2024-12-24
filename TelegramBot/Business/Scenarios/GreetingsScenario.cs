@@ -7,7 +7,7 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBot.Business.Bots.Roles;
+using TelegramBot.Business.Bot.Roles;
 using TelegramBot.Business.Scenarios.AdminScenarios;
 using TelegramBot.Business.Scenarios.UserScenarios;
 
