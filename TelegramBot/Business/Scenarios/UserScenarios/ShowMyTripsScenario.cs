@@ -12,7 +12,7 @@ using TelegramBot.Business.Bot;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
-    public class ShowTripsScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
+    public class ShowMyTripsScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
     {
         private Trip? _currentTrip;
         private Post? _post = GetPost(user);
