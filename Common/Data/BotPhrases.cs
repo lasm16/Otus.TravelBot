@@ -19,10 +19,13 @@
         public const string ConfirmTrip = "Вот ваш пост! Подтвердите или отредактируйте его:";
         public const string Done = "Почти все готово! После проверки сообщения админстрацией ваш пост будет опубликован!";
 
-        public const string TripsFound = "Нашел твои поездки";
+        public const string TripsFound = "Нашел поездки";
         public const string TripsNotFound = "🤥 Поездки не найдены...";
 
-        public const string SuggestDate = "Введите дату предполагаемой поездки: ";
+        public const string SearchTrips = "Ищем поездки...";
+        public const string SearchType = "Выберите способ поиска:";
+        public const string SearchDate = "Введите дату предполагаемой поездки: ";
+        public const string SearchCity = "Введите город, в который хотите поехать: ";
 
         public const string PostsFound = "Нашел новые посты";
         public const string PostsNotFound = "🤥 Посты не найдены...";

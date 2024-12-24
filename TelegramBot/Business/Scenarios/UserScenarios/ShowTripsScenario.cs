@@ -16,6 +16,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
     {
         private Trip? _currentTrip;
         private Post? _post = GetPost(user);
+        private readonly Common.Model.User _user = user;
         private static List<Post> _posts = Repository.Posts;
         private readonly TelegramBotClient _botClient = botClient;
 
@@ -55,7 +56,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task DeleteClick(long chatId, int messageId)
         {
-            var userName = user.UserName;
+            var userName = _user.UserName;
             var trips = GetTrips(_post);
             var tripToDelete = _currentTrip;
             var index = trips.IndexOf(tripToDelete);
@@ -81,7 +82,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task PreviousClick(long chatId, int messageId)
         {
-            var userName = user.UserName;
+            var userName = _user.UserName;
             var trips = GetTrips(_post);
             var index = trips.IndexOf(_currentTrip) - 1;
             var trip = trips[index];
@@ -99,7 +100,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task NextClick(long chatId, int messageId)
         {
-            var userName = user.UserName;
+            var userName = _user.UserName;
             var trips = GetTrips(_post);
             var index = trips.IndexOf(_currentTrip) + 1;
             var trip = trips[index];
@@ -117,7 +118,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task MyTripsClick(long chatId)
         {
-            var userName = user.UserName;
+            var userName = _user.UserName;
             var trips = GetTrips(_post);
             if (trips.Count == 0)
             {
@@ -169,12 +170,12 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnMessage(Message message, UpdateType type)
         {
-            if (message.Text is null)
+            var inputLine = message.Text;
+            if (inputLine is null)
             {
                 return;
             }
-            var action = message.Text;
-            if (!action.Equals("/start"))
+            if (!inputLine.Equals("/start"))
             {
                 Log.Error("Некорректно указан сценарий!");
                 await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
@@ -199,7 +200,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             _botClient.OnUpdate -= OnUpdate;
         }
 
-        private string GetTripText(Trip trip, string userName)
+        private static string GetTripText(Trip trip, string userName)
         {
             var status = GetStatus(trip.Status);
             var message = new StringBuilder();
@@ -208,7 +209,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             message.Append("Дата начала поездки: " + trip.DateStart + "\r\n");
             message.Append("Дата окончания поездки: " + trip.DateEnd + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
-            message.Append("@" + _post.User.UserName);
+            message.Append("@" + userName);
             return message.ToString();
         }
 

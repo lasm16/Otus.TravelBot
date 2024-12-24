@@ -106,6 +106,13 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
+            if (inputLine.Equals("/start"))
+            {
+                UnsubscribeEvents();
+                var scenario = new GreetingScenario(_botClient);
+                scenario.Launch();
+                return;
+            }
             var (isFilled, outPutLine) = FillTrip(inputLine);
             if (isFilled)
             {

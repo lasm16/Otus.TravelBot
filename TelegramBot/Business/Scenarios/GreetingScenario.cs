@@ -145,7 +145,7 @@ namespace TelegramBot.Business.Scenarios
                 {
                     { "Новая поездка",      new CreateNewTripScenario(_botClient, _user) },
                     { "Мои поездки",        new ShowTripsScenario(_botClient, _user) },
-                    { "Найти попутчика",    new FindFellowScenario(_botClient) }
+                    { "Найти попутчика",    new FindFellowScenario(_botClient, _user) }
                 }
             };
         }
@@ -159,7 +159,7 @@ namespace TelegramBot.Business.Scenarios
                     { "Новые посты",        new ShowNewPostsScenario(_botClient) },
                     { "Новая поездка",      new CreateNewTripScenario(_botClient, _user) },
                     { "Мои поездки",        new ShowTripsScenario(_botClient, _user) },
-                    { "Найти попутчика",    new FindFellowScenario(_botClient) }
+                    { "Найти попутчика",    new FindFellowScenario(_botClient, _user) }
                 }
             };
         }
