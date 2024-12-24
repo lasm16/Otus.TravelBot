@@ -1,21 +1,18 @@
 ﻿namespace Common.Model
 {
-
-    /// <summary>
-    /// Depricated
-    /// Пост связан с поездкой, но пока не стоит трогать, чтобы не усложнять логику
-    /// </summary>
     public class Post
     {
-        public Guid Id { get; set; }
-        public Trip? Trip { get; set; }
-        public VipStatus Status { get; set; }
+        public User? User { get; set; }
+        public List<Trip>? Trips { get; set; }
+        //public PostStatus Status { get; set; }
     }
 
-    public enum VipStatus
-    {
-        Requested,
-        Vip,
-        Regular
-    }
+    //public enum PostStatus
+    //{
+    //    New,
+    //    Accepted,
+    //    Declined,
+    //    OnTheWay,
+    //    Ended
+    //}
 }

@@ -23,10 +23,9 @@
         public const string TripsNotFound = "🤥 Поездки не найдены...";
 
         public const string SuggestDate = "Введите дату предполагаемой поездки: ";
-        public const string PostForDelete = "Введите id поста, который хотите удалить: ";
-        public const string PostForUpdate = "Введите id поста, который хотите обновить: ";
-        public const string PostForAccept = "Введите id поста, который хотите принять: ";
-        public const string PostForDecline = "Введите id поста, который хотите отклонить: ";
         public const string PostForVip = "Введите id поста, который хотите сделать VIP: ";
+
+        public const string PostsFound = "Нашел новые посты";
+        public const string PostsNotFound = "🤥 Посты не найдены...";
     }
 }

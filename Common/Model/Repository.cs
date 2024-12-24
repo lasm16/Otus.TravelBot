@@ -7,12 +7,12 @@ namespace Common.Model
     /// </summary>
     public class Repository
     {
-        public static List<Trip>? Trips => GetFromFile();
+        public static List<Post>? Posts => GetFromFile();
 
-        private static List<Trip>? GetFromFile()
+        private static List<Post>? GetFromFile()
         {
-            var fs = new FileStream("trips.json", FileMode.OpenOrCreate);
-            return JsonSerializer.Deserialize<List<Trip>>(fs);
+            using var fs = new FileStream("posts.json", FileMode.OpenOrCreate);
+            return JsonSerializer.Deserialize<List<Post>>(fs);
         }
     }
 }

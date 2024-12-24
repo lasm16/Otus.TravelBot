@@ -20,9 +20,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         public void Launch()
         {
-            _botClient.OnError += OnError;
-            _botClient.OnMessage += OnMessage;
-            _botClient.OnUpdate += OnUpdate;
+            SubscribeEvents();
         }
 
         private async Task OnUpdate(Update update)
@@ -30,7 +28,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             if (update.CallbackQuery!.Data == "Готово")
             {
-                await SaveToFile();
+                var user = update.CallbackQuery.From.Username;
+                await SaveToFile(user);
                 var messageId = update.CallbackQuery.Message.Id;
                 await _botClient.SendMessage(chatId, BotPhrases.Done);
                 await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
@@ -55,12 +54,14 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         }
 
         // удалю, когда будет БД
-        private async Task SaveToFile()
+        private async Task SaveToFile(string user)
         {
+            var post = new Post();
+            post.User.UserName = user;
+            post.Trips.Add(_trip);
             var options = JsonUtils.GetSerializerOptions();
-            var json = JsonSerializer.Serialize(_trip, options);
-
-            using var writer = new StreamWriter("new_trips.json", true, Encoding.UTF8);
+            var json = JsonSerializer.Serialize(post, options);
+            using var writer = new StreamWriter("new_posts.json", true, Encoding.UTF8);
             await writer.WriteLineAsync(json);
         }
 
@@ -150,7 +151,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 _trip.Photo = inputText;
             }
             _trip.Id = Guid.NewGuid();
-            _trip.Status = TripStatus.Review;
+            _trip.Status = TripStatus.New;
             return (true, BotPhrases.ConfirmTrip);
         }
 
@@ -159,6 +160,13 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             _botClient.OnError -= OnError;
             _botClient.OnMessage -= OnMessage;
             _botClient.OnUpdate -= OnUpdate;
+        }
+
+        private void SubscribeEvents()
+        {
+            _botClient.OnError += OnError;
+            _botClient.OnMessage += OnMessage;
+            _botClient.OnUpdate += OnUpdate;
         }
     }
 }

@@ -18,6 +18,8 @@ namespace TelegramBot.Business.Scenarios
         private IBotRole? _botRole;
         private readonly TelegramBotClient _botClient = botClient;
 
+        //public Common.Model.User User { get; set; }
+
         //заменить на инициализацию в конструкторе?
         public void Launch()
         {
@@ -124,12 +126,14 @@ namespace TelegramBot.Business.Scenarios
                 return new Common.Model.User()
                 {
                     Id = user.Id,
+                    UserName = user.Username,
                     UserType = UserType.Admin
                 };
             }
             return new Common.Model.User()
             {
                 Id = user.Id,
+                UserName = user.Username,
                 UserType = UserType.SimpleUser
             };
         }
@@ -153,7 +157,10 @@ namespace TelegramBot.Business.Scenarios
             {
                 Actions = new Dictionary<string, IScenario>
                     {
-                        { "Новые посты",    new ShowNewTripsScenario(_botClient) },
+                        { "Новые посты",        new ShowNewPostsScenario(_botClient) },
+                        { "Новая поездка",      new CreateNewTripScenario(_botClient) },
+                        { "Мои поездки",        new ShowTripsScenario(_botClient) },
+                        { "Найти попутчика",    new FindFellowScenario(_botClient) }
                     }
             };
         }

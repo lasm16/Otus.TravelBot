@@ -13,8 +13,9 @@
 
     public enum TripStatus
     {
-        Review,
-        Planing,
+        New,
+        Accepted,
+        Declined,
         OnTheWay,
         Ended
     }
