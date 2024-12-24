@@ -27,5 +27,15 @@ namespace TelegramBot.Business.Bot
         {
             await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineKeyboard);
         }
+
+        public static InlineKeyboardMarkup GetInlineKeyboardMarkup(params string[] buttonsName)
+        {
+            var inlineMarkup = new InlineKeyboardMarkup();
+            foreach (var button in buttonsName)
+            {
+                inlineMarkup.AddButton(button, button);
+            }
+            return inlineMarkup;
+        }
     }
 }

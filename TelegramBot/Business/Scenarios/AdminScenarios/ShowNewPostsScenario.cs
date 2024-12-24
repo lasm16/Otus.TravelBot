@@ -5,6 +5,8 @@ using Telegram.Bot.Types;
 using Serilog;
 using Telegram.Bot.Polling;
 using Common.Model;
+using Common.Data;
+using TelegramBot.Business.Bot;
 
 namespace TelegramBot.Business.Scenarios.AdminScenarios
 {
@@ -23,29 +25,36 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             if (update.CallbackQuery.Data.Equals("Новые посты"))
             {
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                var list = _posts.Select(x => x.Trips.Where(c => c.Status == TripStatus.New).ToList()).ToList();
-                //var newPostList = _posts.Where(x => x.Trips.Where(c => c.Status == TripStatus.New)).ToList();
-                //var newTripsList = _posts.Select(x => x.Trips.Where(y => y.Status == TripStatus.New).ToList()).ToList();
-                //var newTripList = newPostList.Select(x => x.Trips.Where(v=>v.Status==TripStatus.New).ToList());
-                //if (newTripsList.Count == 0)
-                //{
-                //    await _botClient.SendMessage(chatId, BotPhrases.PostsNotFound);
-                //    return;
-                //}
-                //var inlineMarkup = new InlineKeyboardMarkup()
-                //    .AddButton("Посмотреть", "Посмотреть")
-                //    .AddButton("Принять все", "Принять все");
-                //await _botClient.SendMessage(chatId, BotPhrases.PostsFound + $" ({newTripsList.Count}):", replyMarkup: inlineMarkup);
+                var newTrips = GetTrips();
+                if (newTrips.Count == 0)
+                {
+                    await _botClient.SendMessage(chatId, BotPhrases.PostsNotFound);
+                    return;
+                }
+                var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Посмотреть", "Принять все");
+                await _botClient.SendMessage(chatId, BotPhrases.PostsFound + $" ({newTrips.Count}):", replyMarkup: inlineMarkup);
             }
             if (update.CallbackQuery.Data.Equals("Принять все"))
             {
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
+                //var newPostsLits = _posts.Select(x => x.Trips.Where(c => c.Status == TripStatus.New).ToList()).ToList();
+                //foreach (var list in newPostsLits)
+                //{
+
+                //}
+                //var list1 = newPostsLits.se
                 //var newTripsList = _posts.Where(x => x.Status == PostStatus.New).ToList();
                 //foreach (var trip in newTripsList)
                 //{
                 //    trip.Status = PostStatus.Accepted;
                 //}
             }
+        }
+
+        private static List<Trip> GetTrips()
+        {
+            var ss = _posts.Select(x => x.Trips.Where(c => c.Status == TripStatus.New).ToList()).ToList();
+            return null;
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)

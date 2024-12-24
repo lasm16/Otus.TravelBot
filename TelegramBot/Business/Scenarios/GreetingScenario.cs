@@ -13,7 +13,7 @@ using TelegramBot.Business.Scenarios.UserScenarios;
 
 namespace TelegramBot.Business.Scenarios
 {
-    public class GreetingsScenario(TelegramBotClient botClient) : IScenario
+    public class GreetingScenario(TelegramBotClient botClient) : IScenario
     {
         private IRole _role;
         private Common.Model.User _user;
@@ -22,10 +22,10 @@ namespace TelegramBot.Business.Scenarios
         //заменить на инициализацию в конструкторе?
         public void Launch()
         {
-            SubscriveEvents();
+            SubscribeEvents();
         }
 
-        private void SubscriveEvents()
+        private void SubscribeEvents()
         {
             _botClient.OnError += OnError;
             _botClient.OnMessage += OnMessage;
@@ -142,11 +142,11 @@ namespace TelegramBot.Business.Scenarios
             _role = new UserRole
             {
                 Actions = new Dictionary<string, IScenario>
-                    {
-                        { "Новая поездка",      new CreateNewTripScenario(_botClient, _user) },
-                        { "Мои поездки",        new ShowTripsScenario(_botClient, _user) },
-                        { "Найти попутчика",    new FindFellowScenario(_botClient) }
-                    }
+                {
+                    { "Новая поездка",      new CreateNewTripScenario(_botClient, _user) },
+                    { "Мои поездки",        new ShowTripsScenario(_botClient, _user) },
+                    { "Найти попутчика",    new FindFellowScenario(_botClient) }
+                }
             };
         }
 
@@ -155,12 +155,12 @@ namespace TelegramBot.Business.Scenarios
             _role = new AdminRole
             {
                 Actions = new Dictionary<string, IScenario>
-                    {
-                        { "Новые посты",        new ShowNewPostsScenario(_botClient) },
-                        { "Новая поездка",      new CreateNewTripScenario(_botClient, _user) },
-                        { "Мои поездки",        new ShowTripsScenario(_botClient, _user) },
-                        { "Найти попутчика",    new FindFellowScenario(_botClient) }
-                    }
+                {
+                    { "Новые посты",        new ShowNewPostsScenario(_botClient) },
+                    { "Новая поездка",      new CreateNewTripScenario(_botClient, _user) },
+                    { "Мои поездки",        new ShowTripsScenario(_botClient, _user) },
+                    { "Найти попутчика",    new FindFellowScenario(_botClient) }
+                }
             };
         }
     }

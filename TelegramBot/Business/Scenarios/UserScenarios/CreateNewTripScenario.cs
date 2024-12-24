@@ -8,7 +8,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Business.Bot;
 using TelegramBot.Business.Utils;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
@@ -16,8 +16,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
     public class CreateNewTripScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
     {
         private Trip _trip = new();
-        private Common.Model.User _user = user;
-        private TelegramBotClient _botClient = botClient;
+        private readonly Common.Model.User _user = user;
+        private readonly TelegramBotClient _botClient = botClient;
 
         public void Launch()
         {
@@ -34,7 +34,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 await _botClient.SendMessage(chatId, BotPhrases.Done);
                 await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
                 UnsubscribeEvents();
-                var scenario = new GreetingsScenario(_botClient);
+                var scenario = new GreetingScenario(_botClient);
                 scenario.Launch();
                 return;
             }
@@ -56,9 +56,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         // удалю, когда будет БД
         private async Task SaveToFile()
         {
-            var post = new Post();
-            post.User = _user;
-            post.Trips = [];
+            var post = new Post
+            {
+                User = _user,
+                Trips = []
+            };
             post.Trips.Add(_trip);
             var options = JsonUtils.GetSerializerOptions();
             var json = JsonSerializer.Serialize(post, options);
@@ -74,6 +76,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnMessage(Message message, UpdateType type)
         {
+            var chatId = message.Chat.Id;
             var inputLine = message.Text ?? message.Photo!.Last().FileId;
             if (inputLine == null)
             {
@@ -82,23 +85,18 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var (isFilled, outPutLine) = FillTrip(inputLine);
             if (isFilled)
             {
-                await SendMessageWithInlineKeyboard(message, outPutLine);
+                await SendMessageWithInlineKeyboard(chatId, outPutLine);
                 return;
             }
-            var chatId = message.Chat.Id;
             await _botClient.SendMessage(chatId, outPutLine);
         }
 
-        private async Task SendMessageWithInlineKeyboard(Message message, string outPutLine)
+        private async Task SendMessageWithInlineKeyboard(long chatId, string outPutLine)
         {
-            var inlineMarkup = new InlineKeyboardMarkup()
-                                .AddButton("Готово", "Готово")
-                                .AddButton("Редактировать", "Редактировать");
-
-            var userName = message.Chat.Username;
-            var tripText = GetTripText(outPutLine, userName!);
+            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Готово", "Редактировать");
             var photo = _trip.Photo;
-            var chatId = message.Chat.Id;
+            var userName = _user.UserName;
+            var tripText = GetTripText(outPutLine, userName);
             await _botClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup);
         }
 
