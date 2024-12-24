@@ -31,7 +31,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
                     await _botClient.SendMessage(chatId, BotPhrases.PostsNotFound);
                     return;
                 }
-                var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Посмотреть", "Принять все");
+                var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Посмотреть", "Принять все", "Отклонить все");
                 await _botClient.SendMessage(chatId, BotPhrases.PostsFound + $" ({newTrips.Count}):", replyMarkup: inlineMarkup);
             }
             if (update.CallbackQuery.Data.Equals("Принять все"))
@@ -49,6 +49,10 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
                 //    trip.Status = PostStatus.Accepted;
                 //}
             }
+            if (update.CallbackQuery.Data.Equals("Отклоноить все"))
+            { }
+            if (update.CallbackQuery.Data.Equals("Посмотреть"))
+            { }
         }
 
         private static List<Trip> GetTrips()
