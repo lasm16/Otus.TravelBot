@@ -188,16 +188,15 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             return status switch
             {
                 TripStatus.New => "на рассмотрении администраицией.",
-                TripStatus.Accepted => "одобрено администрацией. Ожидаем поездки.",
+                TripStatus.Accepted => "одобрено администрацией.",
                 TripStatus.Declined => "отклонена администраицей. Удалите пост и создайте новый.",
                 TripStatus.OnTheWay => "в пути.",
-                TripStatus.Ended => "поездка завершена.",
+                TripStatus.Ended => "завершена.",
                 _ => "Unknown",
             };
         }
 
-        private static List<Trip>? GetTrips(Post post) =>
-            post.Trips.Where(x => x.Status == TripStatus.New).ToList();
+        private static List<Trip>? GetTrips(Post post) => post.Trips;
 
         private static Post? GetPost(Common.Model.User user)
         {

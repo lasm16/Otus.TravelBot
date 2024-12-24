@@ -23,7 +23,8 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             if (update.CallbackQuery.Data.Equals("Новые посты"))
             {
                 var chatId = update.CallbackQuery!.Message!.Chat.Id;
-                var newPostList = _posts.Where(x => x.Trips.Any()).ToList();
+                var list = _posts.Select(x => x.Trips.Where(c => c.Status == TripStatus.New).ToList()).ToList();
+                //var newPostList = _posts.Where(x => x.Trips.Where(c => c.Status == TripStatus.New)).ToList();
                 //var newTripsList = _posts.Select(x => x.Trips.Where(y => y.Status == TripStatus.New).ToList()).ToList();
                 //var newTripList = newPostList.Select(x => x.Trips.Where(v=>v.Status==TripStatus.New).ToList());
                 //if (newTripsList.Count == 0)

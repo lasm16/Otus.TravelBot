@@ -19,8 +19,6 @@ namespace TelegramBot.Business.Scenarios
         private Common.Model.User _user;
         private readonly TelegramBotClient _botClient = botClient;
 
-        //public Common.Model.User User { get; set; }
-
         //заменить на инициализацию в конструкторе?
         public void Launch()
         {
