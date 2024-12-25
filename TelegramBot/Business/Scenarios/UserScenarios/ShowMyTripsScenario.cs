@@ -202,7 +202,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private static string GetTripText(Trip trip, string userName)
         {
-            var status = GetStatus(trip.Status);
+            var status = TelegramBotImpl.GetStatus(trip.Status);
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
             message.Append("Планирую посетить: " + trip.City + "\r\n");
@@ -211,19 +211,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
             message.Append("@" + userName);
             return message.ToString();
-        }
-
-        private static string GetStatus(TripStatus status)
-        {
-            return status switch
-            {
-                TripStatus.New => "на рассмотрении администраицией.",
-                TripStatus.Accepted => "одобрено администрацией.",
-                TripStatus.Declined => "отклонена администраицей. Удалите пост и создайте новый.",
-                TripStatus.OnTheWay => "в пути.",
-                TripStatus.Ended => "завершена.",
-                _ => "Unknown",
-            };
         }
 
         private static List<Trip>? GetTrips(Post post) => post.Trips;

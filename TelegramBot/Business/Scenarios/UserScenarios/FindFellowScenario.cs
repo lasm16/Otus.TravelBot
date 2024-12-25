@@ -48,7 +48,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             if (isDate)
             {
             }
-            
+
             await SearchTripsWithCityNames(inputLine, chatId);
             //if (!inputLine.Equals("/start"))
             //{
@@ -69,7 +69,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task SearchTripsWithCityNames(string inputLine, long chatId)
         {
-            var postsWithoutCurrentUser = _posts.Where(x=>x.User.UserName!=_user.UserName).ToList();
+            var postsWithoutCurrentUser = _posts.Where(x => x.User.UserName != _user.UserName).ToList();
             //var trips = postsWithoutCurrentUser.
             var trips = new List<Trip>();
             var trip = new Trip();
@@ -89,7 +89,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private static string GetTripText(Trip trip, string userName)
         {
-            var status = GetStatus(trip.Status);
+            var status = TelegramBotImpl.GetStatus(trip.Status);
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
             message.Append("Планирую посетить: " + trip.City + "\r\n");
@@ -98,16 +98,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
             message.Append("@" + userName);
             return message.ToString();
-        }
-
-        private static string GetStatus(TripStatus status)
-        {
-            return status switch
-            {
-                TripStatus.Accepted => "одобрено администрацией.",
-                TripStatus.OnTheWay => "в пути.",
-                _ => "Unknown",
-            };
         }
 
         private void SubscribeEvents()

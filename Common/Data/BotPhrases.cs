@@ -27,8 +27,10 @@
         public const string SearchDate = "Введите дату предполагаемой поездки: ";
         public const string SearchCity = "Введите город, в который хотите поехать: ";
 
-        public const string PostsFound = "Нашел новые посты";
+        public const string PostsFound = "Нашел новые поездки";
         public const string PostsNotFound = "🤥 Посты не найдены...";
+        public const string AllTripsAccepted = "Все новые поездки приняты!";
+        public const string AllTripsDeclined = "Все новые поездки отклонены!";
 
         public const string UploadPhotoError = "Кажется, не удалось загрузить фотографию. Попробуй еще раз.";
     }

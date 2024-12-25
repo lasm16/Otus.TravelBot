@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using Common.Model;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -36,6 +37,19 @@ namespace TelegramBot.Business.Bot
                 inlineMarkup.AddButton(button, button);
             }
             return inlineMarkup;
+        }
+
+        public static string GetStatus(TripStatus status)
+        {
+            return status switch
+            {
+                TripStatus.New => "на рассмотрении администраицией.",
+                TripStatus.Accepted => "одобрено администрацией.",
+                TripStatus.Declined => "отклонена администраицей. Удалите пост и создайте новый.",
+                TripStatus.OnTheWay => "в пути.",
+                TripStatus.Ended => "завершена.",
+                _ => "Unknown",
+            };
         }
     }
 }
