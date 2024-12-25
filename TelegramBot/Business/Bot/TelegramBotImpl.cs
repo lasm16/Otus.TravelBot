@@ -43,9 +43,9 @@ namespace TelegramBot.Business.Bot
         {
             return status switch
             {
-                TripStatus.New => "на рассмотрении администраицией.",
+                TripStatus.New => "на рассмотрении администрацией.",
                 TripStatus.Accepted => "одобрено администрацией.",
-                TripStatus.Declined => "отклонена администраицей. Удалите пост и создайте новый.",
+                TripStatus.Declined => "отклонена администрацией. Удалите пост и создайте новый.",
                 TripStatus.OnTheWay => "в пути.",
                 TripStatus.Ended => "завершена.",
                 _ => "Unknown",
