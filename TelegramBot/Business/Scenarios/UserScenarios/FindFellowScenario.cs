@@ -12,11 +12,21 @@ using TelegramBot.Business.Bot;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
-    public class FindFellowScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
+    public class FindFellowScenario : IScenario
     {
-        private Common.Model.User _user = user;
+        private object? _currentTrip;
+        private Common.Model.User _user;
+        private List<object> _trips = [];
+        private List<Post> _afterFilterPosts = [];
+        private readonly TelegramBotClient _botClient;
         private static List<Post> _posts = Repository.Posts;
-        private readonly TelegramBotClient _botClient = botClient;
+
+        public FindFellowScenario(TelegramBotClient botClient, Common.Model.User user)
+        {
+            _user = user;
+            _botClient = botClient;
+            _afterFilterPosts = FilterPosts();
+        }
 
         public void Launch()
         {
@@ -43,22 +53,15 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
-            var isDate = DateTime.TryParse(inputLine, out var date);
-            var chatId = message.Chat.Id;
-            if (isDate)
+            if (inputLine.Equals("/start"))
             {
+                UnsubscribeEvents();
+                var scenario = new GreetingScenario(_botClient);
+                scenario.Launch();
+                return;
             }
-
-            await SearchTripsWithCityNames(inputLine, chatId);
-            //if (!inputLine.Equals("/start"))
-            //{
-            //    Log.Error("Некорректно указан сценарий!");
-            //    await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
-            //    return;
-            //}
-            //UnsubscribeEvents();
-            //var scenario = new GreetingScenario(_botClient);
-            //scenario.Launch();
+            var chatId = message.Chat.Id;
+            await SearchTripsWithInputLine(inputLine, chatId);
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
@@ -67,28 +70,33 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             Log.Debug(exception.Message);
         }
 
-        private async Task SearchTripsWithCityNames(string inputLine, long chatId)
+        private async Task SearchTripsWithInputLine(string inputLine, long chatId)
         {
-            var postsWithoutCurrentUser = _posts.Where(x => x.User.UserName != _user.UserName).ToList();
-            //var trips = postsWithoutCurrentUser.
-            var trips = new List<Trip>();
-            var trip = new Trip();
-            await _botClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({postsWithoutCurrentUser.Count}):");
-            var photo = trip.Photo;
-            var userName = "";
-            var text = GetTripText(trip, userName);
+            _trips = GetTrips(inputLine);
 
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить");
+            if (_trips.Count == 0)
+            {
+                await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
+                return;
+            }
+            var trip = _trips[0];
+            _currentTrip = trip;
+            var (text, photo) = GetTripText(trip);
 
-            if (trips.Count > 1)
+            InlineKeyboardMarkup inlineMarkup = null;
+
+            if (_trips.Count > 1)
             {
                 inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Далее");
             }
             await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
         }
 
-        private static string GetTripText(Trip trip, string userName)
+        private static (string text, string photo) GetTripText(object tripObject)
         {
+            var trip = new { City = "", DateStart = "", DateEnd = "", Description = "", Photo = "", Status = TripStatus.Declined, UserName = "" };
+            trip = CastToAnonymousType(trip, tripObject);
+
             var status = TelegramBotImpl.GetStatus(trip.Status);
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
@@ -96,9 +104,72 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             message.Append("Дата начала поездки: " + trip.DateStart + "\r\n");
             message.Append("Дата окончания поездки: " + trip.DateEnd + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
-            message.Append("@" + userName);
-            return message.ToString();
+            message.Append("@" + trip.UserName);
+
+            var text = message.ToString();
+            var photo = trip.Photo;
+            return (text, photo);
         }
+
+        private static T CastToAnonymousType<T>(T typeHolder, Object x) => (T)x;
+
+        private List<object> GetTrips(string inputLine)
+        {
+            // не нравятся двойные массивы
+            List<object> list = [];
+            foreach (var post in _afterFilterPosts)
+            {
+                var userName = post.User.UserName;
+                var isDate = DateTime.TryParse(inputLine, out var date);
+                List<Trip> trips = [];
+                if (isDate)
+                {
+                    trips = post.Trips.Where(x => x.DateStart.Equals(inputLine)).ToList();
+                }
+                else
+                {
+                    trips = post.Trips.Where(x => x.City.Equals(inputLine)).ToList();
+                }
+                foreach (var trip in trips)
+                {
+                    var userWithTrips = new
+                    {
+                        trip.City,
+                        trip.DateStart,
+                        trip.DateEnd,
+                        trip.Description,
+                        trip.Photo,
+                        trip.Status,
+                        UserName = userName,
+                    };
+                    list.Add(userWithTrips);
+                }
+            }
+            return list;
+        }
+
+        private List<Post> FilterPosts()
+        {
+            var list = new List<Post>();
+            var userName = _user.UserName;
+            var posts = GetPostsWithoutCurrentUser(userName);
+            foreach (var post in posts)
+            {
+                var trips = post.Trips.Where(x => x.Status == TripStatus.Accepted || x.Status == TripStatus.OnTheWay).ToList();
+                var newPost = new Post()
+                {
+                    User = post.User,
+                    Trips = trips
+                };
+                list.Add(newPost);
+            }
+            return list;
+        }
+
+        private static List<Post> GetPostsWithoutCurrentUser(string userName) =>
+            _posts
+                .Where(x => !x.User.UserName.Equals(userName))
+                .ToList();
 
         private void SubscribeEvents()
         {
@@ -116,28 +187,56 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task ButtonClick(string? button, long chatId, int messageId)
         {
-            if (button == "Найти попутчика")
+            switch (button)
             {
-                var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("По городу", "По дате");
-                await Click(chatId, messageId, BotPhrases.SearchType, inlineMarkup);
-                return;
-            }
-            if (button == "По городу")
-            {
-                await Click(chatId, messageId, BotPhrases.SearchCity, null);
-                return;
-            }
-            if (button == "По дате")
-            {
-                await Click(chatId, messageId, BotPhrases.SearchDate, null);
-                return;
+                case "Далее":
+                    await NextClick(chatId, messageId);
+                    break;
+                case "Назад":
+                    await PreviousClick(chatId, messageId);
+                    break;
+                case "Найти попутчика":
+                    await FindFellowClick(chatId, messageId, BotPhrases.SearchType);
+                    break;
+                default:
+                    return;
             }
         }
 
-        private async Task Click(long chatId, int messageId, string message, InlineKeyboardMarkup? inlineKeyboard)
+        private async Task PreviousClick(long chatId, int messageId)
         {
-            await _botClient.SendMessage(chatId, message, replyMarkup: inlineKeyboard);
-            await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
+            var index = _trips.IndexOf(_currentTrip) - 1;
+            var trip = _trips[index];
+            _currentTrip = trip;
+            var (text, photo) = GetTripText(trip);
+            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Назад", "Далее");
+            if (index == 0)
+            {
+                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Далее");
+            }
+            await _botClient.DeleteMessage(chatId, messageId);
+            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+        }
+
+        private async Task NextClick(long chatId, int messageId)
+        {
+            var index = _trips.IndexOf(_currentTrip) + 1;
+            var trip = _trips[index];
+            _currentTrip = trip;
+            var (text, photo) = GetTripText(trip);
+            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Назад", "Далее");
+            if (index == _trips.Count - 1)
+            {
+                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Назад");
+            }
+            await _botClient.DeleteMessage(chatId, messageId);
+            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+        }
+
+        private async Task FindFellowClick(long chatId, int messageId, string message)
+        {
+            await _botClient.SendMessage(chatId, message);
+            await _botClient.EditMessageReplyMarkup(chatId, messageId);
         }
     }
 }

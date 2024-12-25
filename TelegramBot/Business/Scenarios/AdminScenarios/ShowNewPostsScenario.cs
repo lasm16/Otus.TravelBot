@@ -247,7 +247,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             foreach (var post in _posts)
             {
                 var userName = post.User.UserName;
-                var trips = post.Trips.Where(x => x.Status == TripStatus.New).ToList();
+                var trips = post.Trips.Where(x => x.Status == TripStatus.New).ToArray();
                 foreach (var trip in trips)
                 {
                     var userWithTrips = new

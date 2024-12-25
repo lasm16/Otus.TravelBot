@@ -22,7 +22,7 @@
         public const string TripsFound = "Нашел поездки";
         public const string TripsNotFound = "🤥 Поездки не найдены...";
 
-        public const string SearchType = "Выберите способ поиска:";
+        public const string SearchType = "Введи город или дату поездки в формате ДД.ММ.ГГГГ:";
         public const string SearchDate = "Введите дату предполагаемой поездки: ";
         public const string SearchCity = "Введите город, в который хотите поехать: ";
 
