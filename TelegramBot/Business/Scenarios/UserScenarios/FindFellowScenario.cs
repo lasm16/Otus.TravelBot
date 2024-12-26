@@ -60,7 +60,14 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 if (_currentMessageId != 0)
                 {
-                    await _botClient.EditMessageReplyMarkup(chatId, _currentMessageId, null);
+                    try
+                    {
+                        await _botClient.EditMessageReplyMarkup(chatId, _currentMessageId, null);
+                    }
+                    catch (ApiRequestException e)
+                    {
+                        Log.Error(e.Message, e.StackTrace);
+                    }
                 }
                 UnsubscribeEvents();
                 var scenario = new GreetingScenario(_botClient);
