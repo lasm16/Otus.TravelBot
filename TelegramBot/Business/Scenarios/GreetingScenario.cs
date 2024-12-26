@@ -18,6 +18,7 @@ namespace TelegramBot.Business.Scenarios
         private IRole _role;
         private Common.Model.User _user;
         private readonly TelegramBotClient _botClient = botClient;
+        private string _launchCommand = System.Configuration.ConfigurationManager.AppSettings["launchCommand"];
 
         //заменить на инициализацию в конструкторе?
         public void Launch()
@@ -75,7 +76,7 @@ namespace TelegramBot.Business.Scenarios
             }
             CheckRole(message);
             var action = message.Text;
-            if (!action.Equals("/start"))
+            if (!action.Equals(_launchCommand))
             {
                 Log.Error("Некорректно указан сценарий!");
                 await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
