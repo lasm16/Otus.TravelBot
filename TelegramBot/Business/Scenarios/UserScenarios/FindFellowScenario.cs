@@ -107,7 +107,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
             if (_searchedTrips.Count > 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Далее");
             }
             var message = BotPhrases.TripsFound + $" ({_searchedTrips.Count}):";
             await _botClient.SendMessage(chatId, message);
@@ -130,7 +130,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var trip = new { City = "", DateStart = "", DateEnd = "", Description = "", Photo = "", Status = TripStatus.Declined, UserName = "" };
             trip = CastToAnonymousType(trip, tripObject);
 
-            var status = TelegramBotImpl.GetStatus(trip.Status);
+            var status = Helper.GetStatus(trip.Status);
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
             message.Append("Планирую посетить: " + trip.City + "\r\n");
@@ -276,7 +276,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
             if (_searchedTrips.Count > 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Далее");
             }
 
             await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
@@ -292,10 +292,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var trip = _searchedTrips[index];
             _currentTrip = trip;
             var (text, photo) = GetTripText(trip);
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Назад", "Далее");
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад", "Далее");
             if (index == 0)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Далее");
             }
             var media = new InputMediaPhoto(photo)
             {
@@ -312,10 +312,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var trip = _searchedTrips[index];
             _currentTrip = trip;
             var (text, photo) = GetTripText(trip);
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Назад", "Далее");
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад", "Далее");
             if (index == _searchedTrips.Count - 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Назад");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад");
             }
             var media = new InputMediaPhoto(photo)
             {
@@ -327,7 +327,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task FindFellowClick(long chatId, int messageId, string message)
         {
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Показать все");
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Показать все");
             var botMessage = await _botClient.SendMessage(chatId, message, replyMarkup: inlineMarkup);
             _currentMessageId = botMessage.MessageId;
             await _botClient.EditMessageReplyMarkup(chatId, messageId);

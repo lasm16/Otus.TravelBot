@@ -100,10 +100,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             _currentTrip = trip;
             var photo = trip.Photo;
             var text = GetTripText(trip, userName);
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
             if (index == 0)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Далее");
             }
             var media = new InputMediaPhoto(photo)
             {
@@ -122,10 +122,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             _currentTrip = trip;
             var photo = trip.Photo;
             var text = GetTripText(trip, userName);
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
             if (index == trips.Count - 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад");
             }
             var media = new InputMediaPhoto(photo)
             {
@@ -149,11 +149,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var photo = trip.Photo;
             var text = GetTripText(trip, userName);
 
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить");
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить");
 
             if (trips.Count > 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Далее");
             }
             var botMessage1 = await _botClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({trips.Count}):");
             _messageIdForPostsCount = botMessage1.MessageId;
@@ -166,19 +166,19 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             InlineKeyboardMarkup? inlineMarkup = null;
             if (count == 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить");
             }
             if (count > 1 && index == 0)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Далее");
             }
             if (count > 1 && index != 0)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
             }
             if (count > 1 && index == count - 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад");
             }
             return inlineMarkup;
         }
@@ -236,7 +236,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private static string GetTripText(Trip trip, string userName)
         {
-            var status = TelegramBotImpl.GetStatus(trip.Status);
+            var status = Helper.GetStatus(trip.Status);
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
             message.Append("Планирую посетить: " + trip.City + "\r\n");

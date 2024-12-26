@@ -40,7 +40,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             var messageList = new List<string>()
             {
-                GetAgreementMessage(),
+                BotPhrases.Agreement,
                 BotPhrases.EnterCity
             };
             foreach (var message in messageList)
@@ -134,7 +134,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task SendMessageWithInlineKeyboard(long chatId, string outPutLine)
         {
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Редактировать", "Готово");
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Редактировать", "Готово");
             var photo = _trip.Photo;
             var userName = _user.UserName;
             var tripText = GetTripText(outPutLine, userName);
@@ -159,18 +159,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             message.Append("Дата окончания поездки: " + _trip.DateEnd + "\r\n");
             message.Append("Описание: \r\n" + _trip.Description + "\r\n");
             message.Append("@" + userName);
-            return message.ToString();
-        }
-
-        private static string GetAgreementMessage()
-        {
-            var message = new StringBuilder();
-            message.Append(BotPhrases.Agreement);
-            message.Append(BotPhrases.SuggestCity);
-            message.Append(BotPhrases.SuggestStartDate);
-            message.Append(BotPhrases.SuggestEndDate);
-            message.Append(BotPhrases.SuggestDescription);
-            message.Append(BotPhrases.SuggestPhoto);
             return message.ToString();
         }
 

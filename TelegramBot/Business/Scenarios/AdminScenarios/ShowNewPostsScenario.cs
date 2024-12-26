@@ -15,18 +15,20 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 {
     public class ShowNewPostsScenario(TelegramBotClient botClient) : IScenario
     {
-        private object? _currentTrip;
+        private Trip? _currentTrip;
         private int _confirmMessageId = 0;
         private int _messageIdForPostsCount = 0;
         private TelegramBotClient _botClient = botClient;
         private static List<Post> _posts = Repository.Posts;
-        private List<object> _trips = GetNewTripsWithUserName();
+        private List<Trip> _trips = [];
+        private Dictionary<string, List<Trip>> _userWithTrips = GetNewTripsWithUserNameDict();
 
         private readonly string _launchCommand = AppConfig.LaunchCommand;
 
         public void Launch()
         {
             SubscribeEvents();
+            _trips = GetTripListFromNewPosts();
         }
 
         private async Task OnUpdate(Update update)
@@ -89,7 +91,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             }
             var trip = _trips[index];
             _currentTrip = trip;
-            var (text, photo) = GetTripText(trip);
+            var (text, photo) = GetTripTextWithPhoto(trip);
             var inlineMarkup = GetNavigationButtons(_trips.Count, index);
             await _botClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.PostsFound + $" ({_trips.Count}):");
 
@@ -120,7 +122,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             }
             var trip = _trips[index];
             _currentTrip = trip;
-            var (text, photo) = GetTripText(trip);
+            var (text, photo) = GetTripTextWithPhoto(trip);
             var inlineMarkup = GetNavigationButtons(_trips.Count, index);
             await _botClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.PostsFound + $" ({_trips.Count}):");
 
@@ -133,8 +135,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private async Task DeclineAllClick(long chatId, int messageId)
         {
-            var newTrips = GetNewTrips();
-            newTrips.ForEach(x => x.Status = TripStatus.Declined);
+            var list = GetTripListFromNewPosts();
             //сохранить в БД
             await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
             await _botClient.SendMessage(chatId, BotPhrases.AllTripsDeclined);
@@ -142,29 +143,48 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private async Task AcceptAllClick(long chatId, int messageId)
         {
-            var newTrips = GetNewTrips();
-            newTrips.ForEach(x => x.Status = TripStatus.Accepted);
+            var list = GetTripListFromNewPosts();
             //сохранить в БД
             await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
             await _botClient.SendMessage(chatId, BotPhrases.AllTripsAccepted);
         }
 
+        private List<Trip> GetTripListFromNewPosts()
+        {
+            var tripsFromMap = _userWithTrips.Values;
+            var list = new List<Trip>();
+            foreach (var trips in tripsFromMap)
+            {
+                var newTrip = new Trip();
+                foreach (var trip in trips)
+                {
+                    newTrip = trip;
+                    newTrip.Status = TripStatus.Accepted;
+                    list.Add(newTrip);
+                }
+            }
+            return list;
+        }
+
         private async Task ShowClick(long chatId, int messageId)
         {
-            if (_trips.Count == 0)
+            var newTripsCount = _userWithTrips.Values.Sum(list => list.Count);
+            if (newTripsCount == 0)
             {
                 await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
-            var trip = _trips[0];
+            var keyValue = _userWithTrips.FirstOrDefault();
+            var userName = keyValue.Key;
+            var trip = keyValue.Value.FirstOrDefault();
             _currentTrip = trip;
-            var (text, photo) = GetTripText(trip);
+            var (text, photo) = GetTripTextWithPhoto(trip);
 
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить");
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить");
 
             if (_trips.Count > 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить", "Далее");
             }
             await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
             var botMessage = await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
@@ -176,11 +196,12 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             var index = _trips.IndexOf(_currentTrip) - 1;
             var trip = _trips[index];
             _currentTrip = trip;
-            var (text, photo) = GetTripText(trip);
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад", "Далее");
+            string userName = null;
+            var (text, photo) = GetTripTextWithPhoto(trip);
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад", "Далее");
             if (index == 0)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить", "Далее");
             }
             var media = new InputMediaPhoto(photo)
             {
@@ -195,11 +216,11 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             var index = _trips.IndexOf(_currentTrip) + 1;
             var trip = _trips[index];
             _currentTrip = trip;
-            var (text, photo) = GetTripText(trip);
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад", "Далее");
+            var (text, photo) = GetTripTextWithPhoto(trip);
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад", "Далее");
             if (index == _trips.Count - 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад");
             }
             var media = new InputMediaPhoto(photo)
             {
@@ -209,16 +230,32 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             _confirmMessageId = botMessage.MessageId;
         }
 
+        private string GetUserName(Trip trip)
+        {
+            string userName = null;
+            foreach (var userNameInDic in from pair in _userWithTrips
+                                          let userNameInDic = pair.Key
+                                          let trips = pair.Value
+                                          from item in trips
+                                          where item == trip
+                                          select userNameInDic)
+            {
+                userName = userNameInDic;
+            }
+
+            return userName;
+        }
+
         private async Task NewPostsClick(long chatId)
         {
-            var newTrips = GetNewTrips();
-            if (newTrips.Count == 0)
+            var newTripsCount = _userWithTrips.Values.Sum(list => list.Count);
+            if (newTripsCount == 0)
             {
                 await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Посмотреть", "Принять все", "Отклонить все");
-            var botMessage = await _botClient.SendMessage(chatId, BotPhrases.PostsFound + $" ({newTrips.Count}):", replyMarkup: inlineMarkup);
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Посмотреть", "Принять все", "Отклонить все");
+            var botMessage = await _botClient.SendMessage(chatId, BotPhrases.PostsFound + $" ({newTripsCount}):", replyMarkup: inlineMarkup);
             _messageIdForPostsCount = botMessage.MessageId;
         }
 
@@ -227,75 +264,52 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             InlineKeyboardMarkup? inlineMarkup = null;
             if (count == 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить");
             }
             if (count > 1 && index == 0)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить", "Далее");
             }
             if (count > 1 && index != 0)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад", "Далее");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад", "Далее");
             }
             if (count > 1 && index == count - 1)
             {
-                inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад");
+                inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад");
             }
             return inlineMarkup;
         }
 
-        private static (string text, string photo) GetTripText(object tripObject)
+        private (string text, string photo) GetTripTextWithPhoto(Trip trip)
         {
-            var trip = new { City = "", DateStart = "", DateEnd = "", Description = "", Photo = "", UserName = "" };
-            trip = CastToAnonymousType(trip, tripObject);
+            var userName = GetUserName(trip);
+            var status = Helper.GetStatus(TripStatus.New);
 
-            var status = TelegramBotImpl.GetStatus(TripStatus.New);
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
             message.Append("Планирую посетить: " + trip.City + "\r\n");
             message.Append("Дата начала поездки: " + trip.DateStart + "\r\n");
             message.Append("Дата окончания поездки: " + trip.DateEnd + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
-            message.Append("@" + trip.UserName);
+            message.Append("@" + userName);
 
             var text = message.ToString();
             var photo = trip.Photo;
             return (text, photo);
         }
 
-        private static List<Trip> GetNewTrips() =>
-            _posts
-                .SelectMany(c => c.Trips
-                .Where(x => x.Status == TripStatus.New))
-                .ToList();
-
-
-        private static List<object> GetNewTripsWithUserName()
+        private static Dictionary<string, List<Trip>> GetNewTripsWithUserNameDict()
         {
-            // не нравятся двойные массивы
-            List<object> list = [];
+            var map = new Dictionary<string, List<Trip>>();
             foreach (var post in _posts)
             {
                 var userName = post.User.UserName;
-                var trips = post.Trips.Where(x => x.Status == TripStatus.New).ToArray();
-                foreach (var trip in trips)
-                {
-                    var userWithTrips = new
-                    {
-                        trip.City,
-                        trip.DateStart,
-                        trip.DateEnd,
-                        trip.Description,
-                        trip.Photo,
-                        UserName = userName,
-                    };
-                    list.Add(userWithTrips);
-                }
+                var trips = post.Trips.Where(x => x.Status == TripStatus.New).ToList();
+                map.Add(userName, trips);
             }
-            return list;
+            return map;
         }
-
-        private static T CastToAnonymousType<T>(T typeHolder, Object x) => (T)x;
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {

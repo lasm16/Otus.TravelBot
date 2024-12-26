@@ -86,7 +86,7 @@ namespace TelegramBot.Business.Scenarios
             }
 
             var currentUser = message.From!.FirstName + " " + message.From.LastName;
-            var greetingsText = $"Приветствую тебя, {currentUser}! Ты можешь выложить пост о планируемой поездке или найти попутчика.";
+            var greetingsText = BotPhrases.Greeting1 + currentUser + BotPhrases.Greeting2;
 
             var actions = _role!.Actions!.Keys;
             var inlineMarkup = new InlineKeyboardMarkup();
