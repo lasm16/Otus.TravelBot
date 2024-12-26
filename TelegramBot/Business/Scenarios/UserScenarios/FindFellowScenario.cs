@@ -68,6 +68,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 scenario.Launch();
                 return;
             }
+            if (_currentMessageId != 0)
+            {
+                await _botClient.EditMessageReplyMarkup(chatId, _currentMessageId, null);
+                _currentMessageId = 0;
+            }
             await SearchTripsWithInputLine(inputLine, chatId);
         }
 
@@ -315,7 +320,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private async Task FindFellowClick(long chatId, int messageId, string message)
         {
             var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Показать все");
-            await _botClient.SendMessage(chatId, message, replyMarkup: inlineMarkup);
+            var botMessage = await _botClient.SendMessage(chatId, message, replyMarkup: inlineMarkup);
+            _currentMessageId = botMessage.MessageId;
             await _botClient.EditMessageReplyMarkup(chatId, messageId);
         }
     }
