@@ -161,8 +161,11 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             {
                 inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Далее");
             }
-            await _botClient.DeleteMessage(chatId, messageId);
-            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var media = new InputMediaPhoto(photo)
+            {
+                Caption = text,
+            };
+            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
         }
 
         private async Task NextClick(long chatId, int messageId)
@@ -176,8 +179,11 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             {
                 inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Назад");
             }
-            await _botClient.DeleteMessage(chatId, messageId);
-            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var media = new InputMediaPhoto(photo)
+            {
+                Caption = text,
+            };
+            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
         }
 
         private async Task NewPostsClick(long chatId)

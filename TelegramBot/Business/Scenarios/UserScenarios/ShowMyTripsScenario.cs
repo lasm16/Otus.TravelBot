@@ -40,8 +40,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 case "Мои поездки":
                     await MyTripsClick(chatId);
                     break;
-                case "Далее": 
-                    await NextClick(chatId, messageId); 
+                case "Далее":
+                    await NextClick(chatId, messageId);
                     break;
                 case "Назад":
                     await PreviousClick(chatId, messageId);
@@ -49,7 +49,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 case "Удалить":
                     await DeleteClick(chatId, messageId);
                     break;
-                default: 
+                default:
                     return;
             }
         }
@@ -94,8 +94,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Далее");
             }
-            await _botClient.DeleteMessage(chatId, messageId);
-            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var media = new InputMediaPhoto(photo)
+            {
+                Caption = text,
+            };
+            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
         }
 
         private async Task NextClick(long chatId, int messageId)
@@ -112,8 +115,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Удалить", "Назад");
             }
-            await _botClient.DeleteMessage(chatId, messageId);
-            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var media = new InputMediaPhoto(photo)
+            {
+                Caption = text,
+            };
+            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
         }
 
         private async Task MyTripsClick(long chatId)

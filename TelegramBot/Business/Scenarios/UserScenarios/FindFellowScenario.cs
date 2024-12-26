@@ -14,12 +14,13 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 {
     public class FindFellowScenario : IScenario
     {
-        private int _currentMessageId = 0;
         private object? _currentTrip;
+        private bool _isDeleted = false;
         private Common.Model.User _user;
+        private int _currentMessageId = 0;
         private List<object> _searchedTrips = [];
-        private readonly TelegramBotClient _botClient;
         private List<Post> _postsWithFilter = [];
+        private readonly TelegramBotClient _botClient;
         private static List<Post> _posts = Repository.Posts;
 
         public FindFellowScenario(TelegramBotClient botClient, Common.Model.User user)
@@ -77,6 +78,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
             if (_searchedTrips.Count == 0)
             {
+                if (!_isDeleted)
+                {
+                    await _botClient.DeleteMessage(chatId, _currentMessageId);
+                }
+                _isDeleted = true;
                 await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
@@ -93,7 +99,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var message = BotPhrases.TripsFound + $" ({_searchedTrips.Count}):";
             await _botClient.SendMessage(chatId, message);
 
-            await _botClient.DeleteMessage(chatId, _currentMessageId);
+            if (!_isDeleted)
+            {
+                await _botClient.DeleteMessage(chatId, _currentMessageId);
+            }
+            _isDeleted = false;
             var botMessage = _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
             _currentMessageId = botMessage.Result.MessageId;
         }
@@ -270,8 +280,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Далее");
             }
-            await _botClient.DeleteMessage(chatId, messageId);
-            var botMessage = await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var media = new InputMediaPhoto(photo)
+            {
+                Caption = text,
+            };
+            var botMessage = await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
             _currentMessageId = botMessage.MessageId;
 
         }
@@ -287,8 +300,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Назад");
             }
-            await _botClient.DeleteMessage(chatId, messageId);
-            var botMessage = await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var media = new InputMediaPhoto(photo)
+            {
+                Caption = text,
+            };
+            var botMessage = await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
             _currentMessageId = botMessage.MessageId;
         }
 
