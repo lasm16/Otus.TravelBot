@@ -22,6 +22,8 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
         private static List<Post> _posts = Repository.Posts;
         private List<object> _trips = GetNewTripsWithUserName();
 
+        private readonly string _launchCommand = AppConfig.LaunchCommand;
+
         public void Launch()
         {
             SubscribeEvents();
@@ -309,7 +311,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             {
                 return;
             }
-            if (!inputLine.Equals("/start"))
+            if (!inputLine.Equals(_launchCommand))
             {
                 Log.Error("Некорректно указан сценарий!");
                 await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);

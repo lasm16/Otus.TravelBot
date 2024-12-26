@@ -18,7 +18,9 @@ namespace TelegramBot.Business.Scenarios
         private IRole _role;
         private Common.Model.User _user;
         private readonly TelegramBotClient _botClient = botClient;
-        private string _launchCommand = System.Configuration.ConfigurationManager.AppSettings["launchCommand"];
+
+        private readonly string? _adminName = AppConfig.AdminName;
+        private readonly string? _launchCommand = AppConfig.LaunchCommand;
 
         //заменить на инициализацию в конструкторе?
         public void Launch()
@@ -114,10 +116,10 @@ namespace TelegramBot.Business.Scenarios
             }
         }
 
-        private static Common.Model.User GetUser(Telegram.Bot.Types.User user)
+        private Common.Model.User GetUser(Telegram.Bot.Types.User user)
         {
             var nickName = user.Username;
-            if (nickName == System.Configuration.ConfigurationManager.AppSettings["adminNickname"])
+            if (nickName == _adminName)
             {
                 return new Common.Model.User()
                 {

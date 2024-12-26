@@ -1,5 +1,6 @@
 ﻿using Common.Services;
 using Telegram.Bot;
+using TelegramBot.Business;
 using TelegramBot.Business.Scenarios;
 
 namespace TelegramBot.Services
@@ -7,7 +8,7 @@ namespace TelegramBot.Services
     public class TelegramBotService() : IBotService
     {
         private TelegramBotClient? _botClient;
-        private readonly string? _key = System.Configuration.ConfigurationManager.AppSettings["userBotToken"];
+        private readonly string? _key = AppConfig.Token;
 
         public async Task StartBotAsync()
         {

@@ -19,9 +19,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private int _confirmMessageId = 0;
         private Post? _post = GetPost(user);
         private int _messageIdForPostsCount = 0;
-        private readonly Common.Model.User _user = user;
         private static List<Post> _posts = Repository.Posts;
+        private readonly Common.Model.User _user = user;
         private readonly TelegramBotClient _botClient = botClient;
+
+        private readonly string _launchCommand = AppConfig.LaunchCommand;
 
         public void Launch()
         {
@@ -195,7 +197,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
-            if (!inputLine.Equals("/start"))
+            if (!inputLine.Equals(_launchCommand))
             {
                 Log.Error("Некорректно указан сценарий!");
                 await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);

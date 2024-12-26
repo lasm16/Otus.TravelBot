@@ -21,6 +21,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private readonly Common.Model.User _user = user;
         private readonly TelegramBotClient _botClient = botClient;
 
+        private readonly string _launchCommand = AppConfig.LaunchCommand;
+
         public void Launch()
         {
             SubscribeEvents();
@@ -110,7 +112,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
-            if (inputLine.Equals("/start"))
+            if (inputLine.Equals(_launchCommand))
             {
                 if (_confirmMessageId != 0)
                 {

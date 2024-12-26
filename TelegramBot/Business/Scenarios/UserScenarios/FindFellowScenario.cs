@@ -23,6 +23,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private readonly TelegramBotClient _botClient;
         private static List<Post> _posts = Repository.Posts;
 
+        private readonly string _launchCommand = AppConfig.LaunchCommand;
+
         public FindFellowScenario(TelegramBotClient botClient, Common.Model.User user)
         {
             _user = user;
@@ -56,7 +58,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
-            if (inputLine.Equals("/start"))
+            if (inputLine.Equals(_launchCommand))
             {
                 if (_currentMessageId != 0)
                 {
