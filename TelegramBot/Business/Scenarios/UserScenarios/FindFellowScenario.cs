@@ -16,7 +16,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
     public class FindFellowScenario : IScenario
     {
         private object? _currentTrip;
-        private bool _isDeleted = false;
         private Common.Model.User _user;
         private int _currentMessageId = 0;
         private List<object> _searchedTrips = [];

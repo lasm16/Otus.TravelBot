@@ -95,8 +95,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message);
-            Log.Debug(exception.Message);
+            Console.WriteLine(exception.Message, exception.StackTrace);
+            Log.Debug(exception.Message, exception.StackTrace);
         }
 
         private async Task OnMessage(Message message, UpdateType type)
@@ -140,7 +140,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             catch (ApiRequestException e)
             {
-                Log.Error(e.Message);
+                Log.Error(e.Message, e.StackTrace);
                 await _botClient.SendMessage(chatId, BotPhrases.UploadPhotoError);
                 _trip.Photo = null;
             }

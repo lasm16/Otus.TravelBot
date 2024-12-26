@@ -183,8 +183,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message);
-            Log.Debug(exception.Message);
+            Console.WriteLine(exception.Message, exception.StackTrace);
+            Log.Debug(exception.Message, exception.StackTrace);
         }
 
         private async Task OnMessage(Message message, UpdateType type)
@@ -209,8 +209,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 }
                 catch (ApiRequestException ex)
                 {
-                    Log.Error(ex.Message);
-                    Console.WriteLine(ex.Message);
+                    Log.Error(ex.Message, ex.StackTrace);
+                    Console.WriteLine(ex.Message, ex.StackTrace);
                 }
             }
             UnsubscribeEvents();
