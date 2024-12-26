@@ -47,6 +47,12 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
         }
 
+        private async Task EditClick(long chatId)
+        {
+            _trip = new Trip();
+            await _botClient.SendMessage(chatId, BotPhrases.EnterCity);
+        }
+
         private async Task ButtonClick(string? button, long chatId, int messageId)
         {
             switch (button)
@@ -55,8 +61,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                     await FinishClick(chatId, messageId);
                     break;
                 case "Редактировать":
-                    EditClick();
-                    await SendMessageForNewTrip(chatId);
+                    await EditClick(chatId);
                     break;
                 case "Новая поездка":
                     await SendMessageForNewTrip(chatId);
@@ -65,8 +70,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                     return;
             }
         }
-
-        private void EditClick() => _trip = new Trip();
 
         private async Task FinishClick(long chatId, int messageId)
         {
