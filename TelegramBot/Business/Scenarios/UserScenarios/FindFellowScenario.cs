@@ -51,18 +51,22 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private async Task OnMessage(Message message, UpdateType type)
         {
             var inputLine = message.Text;
+            var chatId = message.Chat.Id;
             if (inputLine is null)
             {
                 return;
             }
             if (inputLine.Equals("/start"))
             {
+                if (_currentMessageId != 0)
+                {
+                    await _botClient.EditMessageReplyMarkup(chatId, _currentMessageId, null);
+                }
                 UnsubscribeEvents();
                 var scenario = new GreetingScenario(_botClient);
                 scenario.Launch();
                 return;
             }
-            var chatId = message.Chat.Id;
             await SearchTripsWithInputLine(inputLine, chatId);
         }
 

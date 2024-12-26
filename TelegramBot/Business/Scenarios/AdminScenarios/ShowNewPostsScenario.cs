@@ -9,15 +9,18 @@ using Common.Data;
 using TelegramBot.Business.Bot;
 using System.Text;
 using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Exceptions;
 
 namespace TelegramBot.Business.Scenarios.AdminScenarios
 {
     public class ShowNewPostsScenario(TelegramBotClient botClient) : IScenario
     {
         private object? _currentTrip;
-        private List<object> _trips = GetNewTripsWithUserName();
-        private static List<Post> _posts = Repository.Posts;
+        private int _confirmMessageId = 0;
+        private int _messageIdForPostsCount = 0;
         private TelegramBotClient _botClient = botClient;
+        private static List<Post> _posts = Repository.Posts;
+        private List<object> _trips = GetNewTripsWithUserName();
 
         public void Launch()
         {
@@ -67,13 +70,14 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private async Task DeclineClick(long chatId, int messageId)
         {
-            var tripToAccept = _currentTrip;
+            var tripToDecline = _currentTrip;
             //Сохранение данных в БД
-            var index = _trips.IndexOf(tripToAccept);
-            _trips.Remove(tripToAccept);
-            await _botClient.DeleteMessage(chatId, messageId);
+            var index = _trips.IndexOf(tripToDecline);
+            _trips.Remove(tripToDecline); // Заменить на реальное сохранение
             if (_trips.Count == 0)
             {
+                await _botClient.DeleteMessage(chatId, messageId);
+                await _botClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.TripsFound + $" ({_trips.Count}):");
                 await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
@@ -85,7 +89,13 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             _currentTrip = trip;
             var (text, photo) = GetTripText(trip);
             var inlineMarkup = GetNavigationButtons(_trips.Count, index);
-            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            await _botClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.PostsFound + $" ({_trips.Count}):");
+
+            var media = new InputMediaPhoto(photo)
+            {
+                Caption = text,
+            };
+            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
         }
 
         private async Task AcceptClick(long chatId, int messageId)
@@ -93,10 +103,12 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             var tripToAccept = _currentTrip;
             //Сохранение данных в БД
             var index = _trips.IndexOf(tripToAccept);
-            _trips.Remove(tripToAccept);
-            await _botClient.DeleteMessage(chatId, messageId);
+            _trips.Remove(tripToAccept);// Заменить на реальное сохранение
+            _trips.Remove(tripToAccept);// Заменить на реальное сохранение
             if (_trips.Count == 0)
             {
+                await _botClient.DeleteMessage(chatId, messageId);
+                await _botClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.TripsFound + $" ({_trips.Count}):");
                 await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
@@ -108,7 +120,13 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             _currentTrip = trip;
             var (text, photo) = GetTripText(trip);
             var inlineMarkup = GetNavigationButtons(_trips.Count, index);
-            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            await _botClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.PostsFound + $" ({_trips.Count}):");
+
+            var media = new InputMediaPhoto(photo)
+            {
+                Caption = text,
+            };
+            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
         }
 
         private async Task DeclineAllClick(long chatId, int messageId)
@@ -147,7 +165,8 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
                 inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Принять", "Отклонить", "Далее");
             }
             await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
-            await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var botMessage = await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            _confirmMessageId = botMessage.MessageId;
         }
 
         private async Task PreviousClick(long chatId, int messageId)
@@ -165,7 +184,8 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             {
                 Caption = text,
             };
-            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            var botMessage = await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            _confirmMessageId = botMessage.MessageId;
         }
 
         private async Task NextClick(long chatId, int messageId)
@@ -183,7 +203,8 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             {
                 Caption = text,
             };
-            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            var botMessage = await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            _confirmMessageId = botMessage.MessageId;
         }
 
         private async Task NewPostsClick(long chatId)
@@ -195,7 +216,8 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
                 return;
             }
             var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Посмотреть", "Принять все", "Отклонить все");
-            await _botClient.SendMessage(chatId, BotPhrases.PostsFound + $" ({newTrips.Count}):", replyMarkup: inlineMarkup);
+            var botMessage = await _botClient.SendMessage(chatId, BotPhrases.PostsFound + $" ({newTrips.Count}):", replyMarkup: inlineMarkup);
+            _messageIdForPostsCount = botMessage.MessageId;
         }
 
         private static InlineKeyboardMarkup? GetNavigationButtons(int count, int index)
@@ -282,6 +304,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
         private async Task OnMessage(Message message, UpdateType type)
         {
             var inputLine = message.Text;
+            var chatId = message.Chat.Id;
             if (inputLine is null)
             {
                 return;
@@ -291,6 +314,18 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
                 Log.Error("Некорректно указан сценарий!");
                 await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
                 return;
+            }
+            if (_confirmMessageId != 0)
+            {
+                try
+                {
+                    await _botClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null);
+                }
+                catch (ApiRequestException ex)
+                {
+                    Log.Error(ex.Message);
+                    Console.WriteLine(ex.Message);
+                }
             }
             UnsubscribeEvents();
             var scenario = new GreetingScenario(_botClient);

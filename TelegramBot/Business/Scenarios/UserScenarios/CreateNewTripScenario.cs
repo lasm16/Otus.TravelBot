@@ -17,6 +17,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
     public class CreateNewTripScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
     {
         private Trip _trip = new();
+        private int _confirmMessageId = 0;
         private readonly Common.Model.User _user = user;
         private readonly TelegramBotClient _botClient = botClient;
 
@@ -108,6 +109,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             if (inputLine.Equals("/start"))
             {
+                if (_confirmMessageId != 0)
+                {
+                    await _botClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null);
+                }
                 UnsubscribeEvents();
                 var scenario = new GreetingScenario(_botClient);
                 scenario.Launch();
@@ -130,7 +135,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var tripText = GetTripText(outPutLine, userName);
             try
             {
-                await _botClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup);
+                var botMessage = await _botClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup);
+                _confirmMessageId = botMessage.Id;
             }
             catch (ApiRequestException e)
             {
