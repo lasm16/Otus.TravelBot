@@ -34,10 +34,6 @@ namespace TelegramBot.Business.Scenarios
 
         private async Task OnUpdate(Update update)
         {
-            if (update.MessageReaction != null)
-            {
-                return;
-            }
             var scenario = GetScenario(update);
             await RemoveInlineKeyboard(update);
             UnsubscribeEvents();
