@@ -4,7 +4,7 @@
     {
         public const string UnknownCommand = "Я не знаю этой команды...";
 
-        public const string Agreement = "Для того чтобы ваш пост был размещён в группе он должен соответствовать следующему описанию: \r\n";
+        public const string Agreement = "Для того чтобы ваш пост был размещён, он должен соответствовать следующему описанию: \r\n";
         public const string SuggestCity = "1) Город, который планируете посетить. \r\n";
         public const string SuggestStartDate = "2) Предполагаемая дата начала поездки. \r\n";
         public const string SuggestEndDate = "3) Предполагаемая дата окончания поездки. \r\n";

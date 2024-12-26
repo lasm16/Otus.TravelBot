@@ -129,7 +129,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task SendMessageWithInlineKeyboard(long chatId, string outPutLine)
         {
-            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Готово", "Редактировать");
+            var inlineMarkup = TelegramBotImpl.GetInlineKeyboardMarkup("Редактировать", "Готово");
             var photo = _trip.Photo;
             var userName = _user.UserName;
             var tripText = GetTripText(outPutLine, userName);
