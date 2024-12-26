@@ -4,6 +4,7 @@ using Common.Model.Bot;
 using Serilog;
 using System.Text;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -82,11 +83,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
             if (_searchedTrips.Count == 0)
             {
-                if (!_isDeleted)
-                {
-                    await _botClient.DeleteMessage(chatId, _currentMessageId);
-                }
-                _isDeleted = true;
                 await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
@@ -103,11 +99,15 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var message = BotPhrases.TripsFound + $" ({_searchedTrips.Count}):";
             await _botClient.SendMessage(chatId, message);
 
-            if (!_isDeleted)
+            try
             {
                 await _botClient.DeleteMessage(chatId, _currentMessageId);
             }
-            _isDeleted = false;
+            catch (ApiRequestException e)
+            {
+                Log.Error(e.Message, e.StackTrace);
+                Console.WriteLine(e.Message, e.StackTrace);
+            }
             var botMessage = _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
             _currentMessageId = botMessage.Result.MessageId;
         }
