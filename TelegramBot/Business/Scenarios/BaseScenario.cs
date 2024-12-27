@@ -12,7 +12,7 @@ namespace TelegramBot.Business.Scenarios
     {
         public IRole Role { get; set; }
         public Common.Model.User? User { get; set; }
-        public TelegramBotClient BotClient = botClient;
+        public TelegramBotClient BotClient { get; set; } = botClient;
 
         private readonly string? _adminName = AppConfig.AdminName;
 
@@ -67,9 +67,9 @@ namespace TelegramBot.Business.Scenarios
             {
                 Actions = new Dictionary<string, IScenario>
                 {
-                    { "Новая поездка",      new CreateNewTripScenario(botClient, User) },
-                    { "Мои поездки",        new ShowMyTripsScenario(botClient, User) },
-                    { "Найти попутчика",    new FindFellowScenario(botClient, User) }
+                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User) },
+                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User) },
+                    { "Найти попутчика",    new FindFellowScenario(BotClient, User) }
                 }
             };
         }
@@ -80,10 +80,10 @@ namespace TelegramBot.Business.Scenarios
             {
                 Actions = new Dictionary<string, IScenario>
                 {
-                    { "Новые посты",        new ShowNewPostsScenario(botClient) },
-                    { "Новая поездка",      new CreateNewTripScenario(botClient, User) },
-                    { "Мои поездки",        new ShowMyTripsScenario(botClient, User) },
-                    { "Найти попутчика",    new FindFellowScenario(botClient, User) }
+                    { "Новые посты",        new ShowNewPostsScenario(BotClient) },
+                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User) },
+                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User) },
+                    { "Найти попутчика",    new FindFellowScenario(BotClient, User) }
                 }
             };
         }

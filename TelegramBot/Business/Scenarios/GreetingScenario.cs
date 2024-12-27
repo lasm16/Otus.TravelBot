@@ -38,7 +38,7 @@ namespace TelegramBot.Business.Scenarios
         {
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
-            await botClient.EditMessageReplyMarkup(chatId, messageId, null);
+            await BotClient.EditMessageReplyMarkup(chatId, messageId, null);
         }
 
         private void UnsubscribeEvents()

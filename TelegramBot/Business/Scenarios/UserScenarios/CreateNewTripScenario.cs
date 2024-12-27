@@ -14,14 +14,18 @@ using TelegramBot.Business.Utils;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
-    public class CreateNewTripScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
+    public class CreateNewTripScenario : BaseScenario, IScenario
     {
         private Trip _trip = new();
         private int _confirmMessageId = 0;
-        private readonly Common.Model.User _user = user;
-        private readonly TelegramBotClient _botClient = botClient;
 
         private readonly string _launchCommand = AppConfig.LaunchCommand;
+
+        public CreateNewTripScenario(TelegramBotClient botClient, Common.Model.User user) : base(botClient)
+        {
+            BotClient = botClient;
+            User = user;
+        }
 
         public void Launch()
         {
@@ -45,14 +49,14 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             };
             foreach (var message in messageList)
             {
-                await _botClient.SendMessage(chatId, message);
+                await BotClient.SendMessage(chatId, message);
             }
         }
 
         private async Task EditClick(long chatId)
         {
             _trip = new Trip();
-            await _botClient.SendMessage(chatId, BotPhrases.EnterCity);
+            await BotClient.SendMessage(chatId, BotPhrases.EnterCity);
         }
 
         private async Task ButtonClick(string? button, long chatId, int messageId)
@@ -76,10 +80,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private async Task FinishClick(long chatId, int messageId)
         {
             await SaveToFile();
-            await _botClient.SendMessage(chatId, BotPhrases.Done);
-            await _botClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
+            await BotClient.SendMessage(chatId, BotPhrases.Done);
+            await BotClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
             UnsubscribeEvents();
-            var scenario = new GreetingScenario(_botClient);
+            var scenario = new GreetingScenario(BotClient);
             scenario.Launch();
         }
 
@@ -88,7 +92,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             var post = new Post
             {
-                User = _user,
+                User = User,
                 Trips = []
             };
             post.Trips.Add(_trip);
@@ -116,10 +120,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 if (_confirmMessageId != 0)
                 {
-                    await _botClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null);
+                    await BotClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null);
                 }
                 UnsubscribeEvents();
-                var scenario = new GreetingScenario(_botClient);
+                var scenario = new GreetingScenario(BotClient);
                 scenario.Launch();
                 return;
             }
@@ -129,24 +133,24 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 await SendMessageWithInlineKeyboard(chatId, outPutLine);
                 return;
             }
-            await _botClient.SendMessage(chatId, outPutLine);
+            await BotClient.SendMessage(chatId, outPutLine);
         }
 
         private async Task SendMessageWithInlineKeyboard(long chatId, string outPutLine)
         {
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Редактировать", "Готово");
             var photo = _trip.Photo;
-            var userName = _user.UserName;
+            var userName = User.UserName;
             var tripText = GetTripText(outPutLine, userName);
             try
             {
-                var botMessage = await _botClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup);
+                var botMessage = await BotClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup);
                 _confirmMessageId = botMessage.Id;
             }
             catch (ApiRequestException e)
             {
                 Log.Error(e.Message, e.StackTrace);
-                await _botClient.SendMessage(chatId, BotPhrases.UploadPhotoError);
+                await BotClient.SendMessage(chatId, BotPhrases.UploadPhotoError);
                 _trip.Photo = null;
             }
         }
@@ -195,16 +199,16 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private void UnsubscribeEvents()
         {
-            _botClient.OnError -= OnError;
-            _botClient.OnMessage -= OnMessage;
-            _botClient.OnUpdate -= OnUpdate;
+            BotClient.OnError -= OnError;
+            BotClient.OnMessage -= OnMessage;
+            BotClient.OnUpdate -= OnUpdate;
         }
 
         private void SubscribeEvents()
         {
-            _botClient.OnError += OnError;
-            _botClient.OnMessage += OnMessage;
-            _botClient.OnUpdate += OnUpdate;
+            BotClient.OnError += OnError;
+            BotClient.OnMessage += OnMessage;
+            BotClient.OnUpdate += OnUpdate;
         }
     }
 }

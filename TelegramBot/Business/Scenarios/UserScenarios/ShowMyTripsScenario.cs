@@ -19,13 +19,12 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private int _confirmMessageId = 0;
         private int _messageIdForPostsCount = 0;
         private static List<Post> _posts = Repository.Posts;
-        private readonly TelegramBotClient _botClient;
 
         private readonly string _launchCommand = AppConfig.LaunchCommand;
 
         public ShowMyTripsScenario(TelegramBotClient botClient, Common.Model.User user) : base(botClient)
         {
-            _botClient = botClient;
+            BotClient = botClient;
             User = user;
         }
 
@@ -70,9 +69,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             trips.Remove(tripToDelete); // Заменить на удаление из БД
             if (trips.Count == 0)
             {
-                await _botClient.DeleteMessage(chatId, messageId);
-                await _botClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.TripsFound + $" ({trips.Count}):");
-                await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
+                await BotClient.DeleteMessage(chatId, messageId);
+                await BotClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.TripsFound + $" ({trips.Count}):");
+                await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
             if (trips.Count == index)
@@ -88,8 +87,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 Caption = text,
             };
-            await _botClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.TripsFound + $" ({trips.Count}):");
-            await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            await BotClient.EditMessageText(chatId, _messageIdForPostsCount, BotPhrases.TripsFound + $" ({trips.Count}):");
+            await BotClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
             //удалить из БД
         }
 
@@ -112,7 +111,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 Caption = text,
             };
-            var botMessage = await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            var botMessage = await BotClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
             _confirmMessageId = botMessage.MessageId;
         }
 
@@ -135,7 +134,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 Caption = text,
             };
-            var botMessage = await _botClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            var botMessage = await BotClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
             _confirmMessageId = botMessage.MessageId;
         }
 
@@ -146,7 +145,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var trips = GetTrips(post);
             if (trips.Count == 0)
             {
-                await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
+                await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
             var trip = trips[0];
@@ -160,9 +159,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Далее");
             }
-            var botMessage1 = await _botClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({trips.Count}):");
+            var botMessage1 = await BotClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({trips.Count}):");
             _messageIdForPostsCount = botMessage1.MessageId;
-            var botMessage2 = await _botClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var botMessage2 = await BotClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
             _confirmMessageId = botMessage2.MessageId;
         }
 
@@ -205,14 +204,14 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             if (!inputLine.Equals(_launchCommand))
             {
                 Log.Error("Некорректно указан сценарий!");
-                await _botClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
+                await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
                 return;
             }
             if (_confirmMessageId != 0)
             {
                 try
                 {
-                    await _botClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null);
+                    await BotClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null);
                 }
                 catch (ApiRequestException ex)
                 {
@@ -221,22 +220,22 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 }
             }
             UnsubscribeEvents();
-            var scenario = new GreetingScenario(_botClient);
+            var scenario = new GreetingScenario(BotClient);
             scenario.Launch();
         }
 
         private void SubscribeEvents()
         {
-            _botClient.OnError += OnError;
-            _botClient.OnMessage += OnMessage;
-            _botClient.OnUpdate += OnUpdate;
+            BotClient.OnError += OnError;
+            BotClient.OnMessage += OnMessage;
+            BotClient.OnUpdate += OnUpdate;
         }
 
         private void UnsubscribeEvents()
         {
-            _botClient.OnError -= OnError;
-            _botClient.OnMessage -= OnMessage;
-            _botClient.OnUpdate -= OnUpdate;
+            BotClient.OnError -= OnError;
+            BotClient.OnMessage -= OnMessage;
+            BotClient.OnUpdate -= OnUpdate;
         }
 
         private static string GetTripText(Trip trip, string userName)
