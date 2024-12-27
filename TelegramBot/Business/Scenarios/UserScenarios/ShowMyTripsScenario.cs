@@ -13,22 +13,23 @@ using TelegramBot.Business.Bot;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
-    public class ShowMyTripsScenario(TelegramBotClient botClient, Common.Model.User user) : IScenario
+    public class ShowMyTripsScenario : BaseScenario, IScenario
     {
         private Trip? _currentTrip;
         private int _confirmMessageId = 0;
-        private Post? _post = GetPost(user);
         private int _messageIdForPostsCount = 0;
         private static List<Post> _posts = Repository.Posts;
-        private readonly Common.Model.User _user = user;
-        private readonly TelegramBotClient _botClient = botClient;
+        private readonly TelegramBotClient _botClient;
 
         private readonly string _launchCommand = AppConfig.LaunchCommand;
 
-        public void Launch()
+        public ShowMyTripsScenario(TelegramBotClient botClient, Common.Model.User user) : base(botClient)
         {
-            SubscribeEvents();
+            _botClient = botClient;
+            User = user;
         }
+
+        public void Launch() => SubscribeEvents();
 
         private async Task OnUpdate(Update update)
         {
@@ -61,8 +62,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task DeleteClick(long chatId, int messageId)
         {
-            var userName = _user.UserName;
-            var trips = GetTrips(_post);
+            var userName = User.UserName;
+            var post = GetPost();
+            var trips = GetTrips(post);
             var tripToDelete = _currentTrip;
             var index = trips.IndexOf(tripToDelete);
             trips.Remove(tripToDelete); // Заменить на удаление из БД
@@ -93,8 +95,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task PreviousClick(long chatId, int messageId)
         {
-            var userName = _user.UserName;
-            var trips = GetTrips(_post);
+            var userName = User.UserName;
+            var post = GetPost();
+            var trips = GetTrips(post);
             var index = trips.IndexOf(_currentTrip) - 1;
             var trip = trips[index];
             _currentTrip = trip;
@@ -115,8 +118,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task NextClick(long chatId, int messageId)
         {
-            var userName = _user.UserName;
-            var trips = GetTrips(_post);
+            var userName = User.UserName;
+            var post = GetPost();
+            var trips = GetTrips(post);
             var index = trips.IndexOf(_currentTrip) + 1;
             var trip = trips[index];
             _currentTrip = trip;
@@ -137,8 +141,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task MyTripsClick(long chatId)
         {
-            var userName = _user.UserName;
-            var trips = GetTrips(_post);
+            var userName = User.UserName;
+            var post = GetPost();
+            var trips = GetTrips(post);
             if (trips.Count == 0)
             {
                 await _botClient.SendMessage(chatId, BotPhrases.TripsNotFound);
@@ -249,10 +254,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private static List<Trip>? GetTrips(Post post) => post.Trips;
 
-        private static Post? GetPost(Common.Model.User user)
-        {
-            var userName = user.UserName;
-            return _posts.Where(x => x.User.UserName == userName).FirstOrDefault();
-        }
+        private Post? GetPost() => _posts.FirstOrDefault(x => x.User.UserName == User.UserName);
     }
 }
