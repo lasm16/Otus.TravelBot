@@ -88,10 +88,28 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task SaveToDb()
         {
+            var isNewUser = CheckUser(User);
+            if (isNewUser)
+            {
+                using var db = new ApplicationContext();
+                await db.Trips.AddAsync(_trip);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                using var db = new ApplicationContext();
+                db.Users.Attach(User);
+                await db.Trips.AddAsync(_trip);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        private static bool CheckUser(DataBase.Models.User? user)
+        {
+            var userId = user.Id;
             using var db = new ApplicationContext();
-            db.Users.Attach(User);
-            await db.Trips.AddAsync(_trip);
-            await db.SaveChangesAsync();
+            var userFromDb = db.Users.Where(x => x.Id == userId);
+            return userFromDb != null;
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
