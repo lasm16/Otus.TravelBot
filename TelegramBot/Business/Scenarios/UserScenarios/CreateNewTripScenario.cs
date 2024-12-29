@@ -109,7 +109,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var userId = user.Id;
             using var db = new ApplicationContext();
             var userFromDb = db.Users.Where(x => x.Id == userId);
-            return userFromDb != null;
+            return userFromDb == null;
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
