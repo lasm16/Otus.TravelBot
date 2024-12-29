@@ -19,6 +19,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private int _currentTripIndex = 0;
         private int _currentMessageId = 0;
         private List<Trip> _trips = GetTrips();
+        private List<Trip> _searchedTrips = [];
 
         private readonly string _launchCommand = AppConfig.LaunchCommand;
 
@@ -74,7 +75,14 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             if (_currentMessageId != 0)
             {
-                await BotClient.EditMessageReplyMarkup(chatId, _currentMessageId, null);
+                try
+                {
+                    await BotClient.EditMessageReplyMarkup(chatId, _currentMessageId, null);
+                }
+                catch (ApiRequestException e)
+                {
+                    Log.Error(e.Message, e.StackTrace);
+                }
                 _currentMessageId = 0;
             }
             await SearchTripsWithInputLine(inputLine, chatId);
@@ -82,30 +90,30 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message);
-            Log.Debug(exception.Message);
+            Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
+            Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
         }
 
         private async Task SearchTripsWithInputLine(string inputLine, long chatId)
         {
-            var searchedTrips = GetTripsWithFilter(inputLine);
+            _searchedTrips = GetTripsWithFilter(inputLine);
 
-            if (searchedTrips.Count == 0)
+            if (_searchedTrips.Count == 0)
             {
                 await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound);
                 return;
             }
             _currentTripIndex = 0;
-            var trip = searchedTrips[_currentTripIndex];
+            var trip = _searchedTrips[_currentTripIndex];
             var (text, photo) = GetTripText(trip);
 
             InlineKeyboardMarkup inlineMarkup = null;
 
-            if (searchedTrips.Count > 1)
+            if (_searchedTrips.Count > 1)
             {
                 inlineMarkup = Helper.GetInlineKeyboardMarkup("Далее");
             }
-            var message = BotPhrases.TripsFound + $" ({searchedTrips.Count}):";
+            var message = BotPhrases.TripsFound + $" ({_searchedTrips.Count}):";
             await BotClient.SendMessage(chatId, message);
 
             try
@@ -211,7 +219,15 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private async Task PreviousClick(long chatId, int messageId)
         {
             var index = _currentTripIndex - 1;
-            var trip = _trips[index];
+            Trip trip;
+            if (_searchedTrips.Count != 0)
+            {
+                trip = _searchedTrips[index];
+            }
+            else
+            {
+                trip = _trips[index];
+            }
             _currentTripIndex = index;
             var (text, photo) = GetTripText(trip);
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад", "Далее");
@@ -231,14 +247,28 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private async Task NextClick(long chatId, int messageId)
         {
             var index = _currentTripIndex + 1;
-            var trip = _trips[index];
+            Trip trip;
+            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад", "Далее");
+
+            if (_searchedTrips.Count != 0)
+            {
+                trip = _searchedTrips[index];
+                if (index == _searchedTrips.Count - 1)
+                {
+                    inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад");
+                }
+            }
+            else
+            {
+                trip = _trips[index];
+                if (index == _trips.Count - 1)
+                {
+                    inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад");
+                }
+            }
             _currentTripIndex = index;
             var (text, photo) = GetTripText(trip);
-            var inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад", "Далее");
-            if (index == _trips.Count - 1)
-            {
-                inlineMarkup = Helper.GetInlineKeyboardMarkup("Назад");
-            }
+            
             var media = new InputMediaPhoto(photo)
             {
                 Caption = text,

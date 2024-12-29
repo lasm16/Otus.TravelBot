@@ -306,8 +306,8 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message, exception.StackTrace);
-            Log.Debug(exception.Message, exception.StackTrace);
+            Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
+            Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
         }
 
         private async Task OnMessage(Message message, UpdateType type)
