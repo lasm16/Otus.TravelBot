@@ -1,16 +1,15 @@
 ﻿using Common.Data;
-using Common.Model;
 using Common.Model.Bot;
+using DataBase;
+using DataBase.Models;
 using Serilog;
 using System.Text;
-using System.Text.Json;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramBot.Business.Bot;
-using TelegramBot.Business.Utils;
 
 namespace TelegramBot.Business.Scenarios.UserScenarios
 {
@@ -21,7 +20,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private readonly string _launchCommand = AppConfig.LaunchCommand;
 
-        public CreateNewTripScenario(TelegramBotClient botClient, Common.Model.User user) : base(botClient)
+        public CreateNewTripScenario(TelegramBotClient botClient, DataBase.Models.User user) : base(botClient)
         {
             BotClient = botClient;
             User = user;
@@ -79,7 +78,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task FinishClick(long chatId, int messageId)
         {
-            await SaveToFile();
+            await SaveToDb();
             await BotClient.SendMessage(chatId, BotPhrases.Done);
             await BotClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
             UnsubscribeEvents();
@@ -87,19 +86,12 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             scenario.Launch();
         }
 
-        // удалю, когда будет БД
-        private async Task SaveToFile()
+        private async Task SaveToDb()
         {
-            var post = new Post
-            {
-                User = User,
-                Trips = []
-            };
-            post.Trips.Add(_trip);
-            var options = JsonUtils.GetSerializerOptions();
-            var json = JsonSerializer.Serialize(post, options);
-            using var writer = new StreamWriter("new_posts.json", true, Encoding.UTF8);
-            await writer.WriteLineAsync(json);
+            using var db = new ApplicationContext();
+            db.Users.Attach(User);
+            await db.Trips.AddAsync(_trip);
+            await db.SaveChangesAsync();
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
@@ -140,7 +132,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Редактировать", "Готово");
             var photo = _trip.Photo;
-            var userName = User.UserName;
+            var userName = User.NickName;
             var tripText = GetTripText(outPutLine, userName);
             try
             {
@@ -159,8 +151,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             var message = new StringBuilder(text + "\r\n");
             message.Append("Планирую посетить: " + _trip.City + "\r\n");
-            message.Append("Дата начала поездки: " + _trip.DateStart + "\r\n");
-            message.Append("Дата окончания поездки: " + _trip.DateEnd + "\r\n");
+            message.Append("Дата начала поездки: " + _trip.DateStart.ToShortDateString() + "\r\n");
+            message.Append("Дата окончания поездки: " + _trip.DateEnd.ToShortDateString() + "\r\n");
             message.Append("Описание: \r\n" + _trip.Description + "\r\n");
             message.Append("@" + userName);
             return message.ToString();
@@ -173,14 +165,16 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 _trip.City = inputText;
                 return (false, BotPhrases.EnterStartDate);
             }
-            if (_trip.DateStart == null)
+            if (_trip.DateStart == DateTime.MinValue)
             {
-                _trip.DateStart = inputText;
+                _ = DateTime.TryParse(inputText, out var result);
+                _trip.DateStart = result;
                 return (false, BotPhrases.EnterEndDate);
             }
-            if (_trip.DateEnd == null)
+            if (_trip.DateEnd == DateTime.MinValue)
             {
-                _trip.DateEnd = inputText;
+                _ = DateTime.TryParse(inputText, out var result);
+                _trip.DateEnd = result;
                 return (false, BotPhrases.EnterDescription);
             }
             if (_trip.Description == null)
@@ -194,6 +188,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             _trip.Id = Guid.NewGuid();
             _trip.Status = TripStatus.New;
+            _trip.User = User;
             return (true, BotPhrases.ConfirmTrip);
         }
 
