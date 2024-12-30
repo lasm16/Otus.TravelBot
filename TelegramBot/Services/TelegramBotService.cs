@@ -2,6 +2,7 @@
 using Telegram.Bot;
 using TelegramBot.Business;
 using TelegramBot.Business.Scenarios;
+using TelegramBot.Business.Utils;
 
 namespace TelegramBot.Services
 {
@@ -24,8 +25,15 @@ namespace TelegramBot.Services
             scenario.Launch();
 
             Console.WriteLine($"@{me!.Username} is running... Press Esc to terminate");
-            while (Console.ReadKey(true).Key != ConsoleKey.Escape) ;
-            cts.Cancel();
+
+            //заменить на что-то получше
+            while (true)
+            {
+                if (DateTime.Now.Hour == 0 && DateTime.Now.Minute == 0 && DateTime.Now.Second == 0)
+                {
+                    await Scheduler.CheckUpdates(cts);
+                }
+            }
         }
     }
 }
