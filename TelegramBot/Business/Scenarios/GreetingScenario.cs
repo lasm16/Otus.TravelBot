@@ -11,7 +11,7 @@ namespace TelegramBot.Business.Scenarios
 {
     public class GreetingScenario(TelegramBotClient botClient) : BaseScenario(botClient), IScenario
     {
-        private readonly string? _launchCommand = AppConfig.LaunchCommand;
+        private List<string> _launchCommands = AppConfig.LaunchCommands;
 
         //заменить на инициализацию в конструкторе?
         public void Launch()
@@ -56,21 +56,22 @@ namespace TelegramBot.Business.Scenarios
 
         private async Task OnMessage(Message message, UpdateType type)
         {
-            if (message.Text is null)
+            var inputLine = message.Text ?? message.Photo!.Last().FileId;
+            if (inputLine == null)
             {
                 return;
             }
             CheckRole(message);
-            var action = message.Text;
-            if (!action.Equals(_launchCommand))
+            if (!_launchCommands.Contains(inputLine))
             {
                 Log.Error("Некорректно указан сценарий!");
                 await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
                 return;
             }
+            var tgUser = message.From;
+            var userName = GetUserName(tgUser);
 
-            var currentUser = message.From!.FirstName + " " + message.From.LastName;
-            var greetingsText = BotPhrases.Greeting1 + currentUser + BotPhrases.Greeting2;
+            var greetingsText = BotPhrases.Greeting1 + userName + BotPhrases.Greeting2;
 
             var actions = Role!.Actions!.Keys;
             var inlineMarkup = new InlineKeyboardMarkup();
@@ -80,6 +81,19 @@ namespace TelegramBot.Business.Scenarios
             }
             var chatId = message.Chat.Id;
             await BotClient.SendMessage(chatId, greetingsText!, replyMarkup: inlineMarkup);
+        }
+
+        private static string GetUserName(User? tgUser)
+        {
+            if (tgUser.FirstName != null)
+            {
+                return tgUser.FirstName;
+            }
+            if (tgUser.Username != null)
+            {
+                return tgUser.Username;
+            }
+            return "друг";
         }
     }
 }

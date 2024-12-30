@@ -21,7 +21,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private List<Trip> _trips = GetTrips();
         private List<Trip> _searchedTrips = [];
 
-        private readonly string _launchCommand = AppConfig.LaunchCommand;
+        private List<string> _launchCommands = AppConfig.LaunchCommands;
 
         public FindFellowScenario(TelegramBotClient botClient, DataBase.Models.User user) : base(botClient)
         {
@@ -55,7 +55,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
-            if (inputLine.Equals(_launchCommand))
+            if (_launchCommands.Contains(inputLine))
             {
                 if (_currentMessageId != 0)
                 {
@@ -137,7 +137,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
-            message.Append("Планирую посетить: " + trip.City + "\r\n");
+            message.Append("Планирую посетить: " + trip.City + ", " + trip.Country + "\r\n");
             message.Append("Дата начала поездки: " + trip.DateStart.ToShortDateString() + "\r\n");
             message.Append("Дата окончания поездки: " + trip.DateEnd.ToShortDateString() + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
@@ -152,7 +152,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             using var db = new ApplicationContext();
             var trips = db.Trips.ToList();
-            return trips.Where(x => x.Status == TripStatus.Accepted || x.Status == TripStatus.OnTheWay).ToList();
+            return [.. trips.Where(x => x.Status == TripStatus.Accepted || x.Status == TripStatus.OnTheWay).OrderBy(x => x.DateStart)];
         }
 
         private void SubscribeEvents()
@@ -268,7 +268,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             _currentTripIndex = index;
             var (text, photo) = GetTripText(trip);
-            
+
             var media = new InputMediaPhoto(photo)
             {
                 Caption = text,
@@ -296,11 +296,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var isDate = DateTime.TryParse(inputLine, out var date);
             if (isDate)
             {
-                return _trips.Where(x => x.DateStart.ToShortDateString().Equals(inputLine)).ToList();
+                return [.. _trips.Where(x => x.DateStart.ToShortDateString().Equals(inputLine)).OrderBy(x => x.DateStart)];
             }
             else
             {
-                return _trips.Where(x => x.City.Equals(inputLine)).ToList();
+                return [.. _trips.Where(x => x.City.Equals(inputLine) || x.Country.Equals(inputLine)).OrderBy(x => x.DateStart)];
             }
         }
     }

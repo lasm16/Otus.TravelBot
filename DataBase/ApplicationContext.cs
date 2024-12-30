@@ -11,6 +11,10 @@ namespace DataBase
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = System.Configuration.ConfigurationManager.AppSettings["connectionString"];
+            if (connectionString == null)
+            {
+                throw new ArgumentNullException(connectionString, "Не установлена строка подключения к БД в App.config!");
+            }
             optionsBuilder.UseSqlServer(connectionString);
         }
     }

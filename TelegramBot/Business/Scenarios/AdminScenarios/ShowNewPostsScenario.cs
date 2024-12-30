@@ -21,7 +21,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
         private int _messageIdForPostsCount = 0;
         private List<Trip> _trips => GetNewTrips();
 
-        private readonly string _launchCommand = AppConfig.LaunchCommand;
+        private List<string> _launchCommands = AppConfig.LaunchCommands;
 
         public void Launch() => SubscribeEvents();
 
@@ -180,7 +180,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
         {
             using var db = new ApplicationContext();
             var trips = db.Trips.ToList();
-            return trips.Where(x => x.Status == TripStatus.New).ToList();
+            return [.. trips.Where(x => x.Status == TripStatus.New).OrderBy(x => x.DateCreated)];
         }
 
         private async Task ShowClick(long chatId, int messageId)
@@ -287,9 +287,9 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
-            message.Append("Планирую посетить: " + trip.City + "\r\n");
-            message.Append("Дата начала поездки: " + trip.DateStart + "\r\n");
-            message.Append("Дата окончания поездки: " + trip.DateEnd + "\r\n");
+            message.Append("Планирую посетить: " + trip.City + ", " + trip.Country + "\r\n");
+            message.Append("Дата начала поездки: " + trip.DateStart.ToShortDateString() + "\r\n");
+            message.Append("Дата окончания поездки: " + trip.DateEnd.ToShortDateString() + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
             message.Append("@" + userName);
 
@@ -318,7 +318,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             {
                 return;
             }
-            if (!inputLine.Equals(_launchCommand))
+            if (!_launchCommands.Contains(inputLine))
             {
                 Log.Error("Некорректно указан сценарий!");
                 await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);

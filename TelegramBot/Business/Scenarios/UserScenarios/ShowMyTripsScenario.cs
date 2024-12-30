@@ -21,7 +21,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private int _messageIdForPostsCount = 0;
         private List<Trip> _myTrips => GetTrips();
 
-        private readonly string? _launchCommand = AppConfig.LaunchCommand;
+        private List<string> _launchCommands = AppConfig.LaunchCommands;
 
         public ShowMyTripsScenario(TelegramBotClient botClient, DataBase.Models.User user) : base(botClient)
         {
@@ -200,7 +200,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
-            if (!inputLine.Equals(_launchCommand))
+            if (!_launchCommands.Contains(inputLine))
             {
                 Log.Error("Некорректно указан сценарий!");
                 await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
@@ -242,7 +242,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var status = Helper.GetStatus(trip.Status);
             var message = new StringBuilder();
             message.Append("Статус поездки: " + status + "\r\n");
-            message.Append("Планирую посетить: " + trip.City + "\r\n");
+            message.Append("Планирую посетить: " + trip.City + ", " + trip.Country + "\r\n");
             message.Append("Дата начала поездки: " + trip.DateStart.ToShortDateString() + "\r\n");
             message.Append("Дата окончания поездки: " + trip.DateEnd.ToShortDateString() + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
@@ -254,7 +254,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             using var db = new ApplicationContext();
             var trips = db.Trips.ToList();
-            return trips.Where(x => x.UserId == User.Id).ToList();
+            return [.. trips.Where(x => x.UserId == User.Id).OrderBy(x => x.DateCreated)];
         }
     }
 }

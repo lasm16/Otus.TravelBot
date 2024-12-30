@@ -18,7 +18,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private Trip _trip = new();
         private int _confirmMessageId = 0;
 
-        private readonly string _launchCommand = AppConfig.LaunchCommand;
+        private List<string> _launchCommands = AppConfig.LaunchCommands;
 
         public CreateNewTripScenario(TelegramBotClient botClient, DataBase.Models.User user) : base(botClient)
         {
@@ -126,7 +126,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 return;
             }
-            if (inputLine.Equals(_launchCommand))
+            if (_launchCommands.Contains(inputLine))
             {
                 if (_confirmMessageId != 0)
                 {
@@ -168,7 +168,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         private string GetTripText(string text, string userName)
         {
             var message = new StringBuilder(text + "\r\n");
-            message.Append("Планирую посетить: " + _trip.City + "\r\n");
+            message.Append("Планирую посетить: " + _trip.City + "," + _trip.Country + "\r\n");
             message.Append("Дата начала поездки: " + _trip.DateStart.ToShortDateString() + "\r\n");
             message.Append("Дата окончания поездки: " + _trip.DateEnd.ToShortDateString() + "\r\n");
             message.Append("Описание: \r\n" + _trip.Description + "\r\n");
@@ -181,16 +181,41 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             if (_trip.City == null)
             {
                 _trip.City = inputText;
+                return (false, BotPhrases.EnterCountry);
+            }
+            if (_trip.Country == null)
+            {
+                _trip.Country = inputText;
                 return (false, BotPhrases.EnterStartDate);
             }
             if (_trip.DateStart == DateTime.MinValue)
             {
+                var isDate = IsDate(inputText);
+                if (!isDate)
+                {
+                    return (false, BotPhrases.EnterDateError);
+                }
+                var isCorrectDate = IsCorrectStartDate(inputText);
+                if (!isCorrectDate)
+                {
+                    return (false, BotPhrases.EnterStartDateError);
+                }
                 _ = DateTime.TryParse(inputText, out var result);
                 _trip.DateStart = result;
                 return (false, BotPhrases.EnterEndDate);
             }
             if (_trip.DateEnd == DateTime.MinValue)
             {
+                var isDate = IsDate(inputText);
+                if (!isDate)
+                {
+                    return (false, BotPhrases.EnterDateError);
+                }
+                var isCorrectDate = IsCorrectEndDate(inputText);
+                if (!isCorrectDate)
+                {
+                    return (false, BotPhrases.EnterStartDateError);
+                }
                 _ = DateTime.TryParse(inputText, out var result);
                 _trip.DateEnd = result;
                 return (false, BotPhrases.EnterDescription);
@@ -206,8 +231,34 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             _trip.Id = Guid.NewGuid();
             _trip.Status = TripStatus.New;
+            _trip.DateCreated = DateTime.Now.Date;
             _trip.User = User;
             return (true, BotPhrases.ConfirmTrip);
+        }
+
+        private static bool IsDate(string inputText)
+        {
+            return DateTime.TryParse(inputText, out _);
+        }
+
+        private static bool IsCorrectStartDate(string inputText)
+        {
+            _ = DateTime.TryParse(inputText, out var result);
+            if (result < DateTime.Now.Date)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private bool IsCorrectEndDate(string inputText)
+        {
+            _ = DateTime.TryParse(inputText, out var result);
+            if (result < _trip.DateStart)
+            {
+                return false;
+            }
+            return true;
         }
 
         private void UnsubscribeEvents()
