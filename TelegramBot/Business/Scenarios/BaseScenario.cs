@@ -11,7 +11,7 @@ namespace TelegramBot.Business.Scenarios
 {
     public abstract class BaseScenario(TelegramBotClient botClient)
     {
-        public IRole Role { get; set; }
+        public IRole? Role { get; set; }
         public DataBase.Models.User? User { get; set; }
         public TelegramBotClient BotClient { get; set; } = botClient;
         private static List<long> _admins => GetAdminIds();
@@ -67,9 +67,9 @@ namespace TelegramBot.Business.Scenarios
             {
                 Actions = new Dictionary<string, IScenario>
                 {
-                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User) },
-                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User) },
-                    { "Найти попутчика",    new FindFellowScenario(BotClient, User) }
+                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User!) },
+                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User!) },
+                    { "Найти попутчика",    new FindFellowScenario(BotClient, User!) }
                 }
             };
         }
@@ -81,9 +81,9 @@ namespace TelegramBot.Business.Scenarios
                 Actions = new Dictionary<string, IScenario>
                 {
                     { "Новые посты",        new ShowNewPostsScenario(BotClient) },
-                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User) },
-                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User) },
-                    { "Найти попутчика",    new FindFellowScenario(BotClient, User) }
+                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User!) },
+                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User!) },
+                    { "Найти попутчика",    new FindFellowScenario(BotClient, User!) }
                 }
             };
         }

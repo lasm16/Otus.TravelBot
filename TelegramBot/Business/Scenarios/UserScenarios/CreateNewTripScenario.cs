@@ -30,7 +30,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnUpdate(Update update)
         {
-            var button = update.CallbackQuery.Data;
+            var button = update.CallbackQuery!.Data;
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
             await ButtonClick(button, chatId, messageId);
@@ -95,7 +95,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             else
             {
                 using var db = new ApplicationContext();
-                db.Users.Attach(User);
+                db.Users.Attach(User!);
                 await db.Trips.AddAsync(_trip, cancellationToken: BotClient.GlobalCancelToken);
                 await db.SaveChangesAsync(cancellationToken: BotClient.GlobalCancelToken);
             }
@@ -103,7 +103,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private static bool CheckUser(DataBase.Models.User? user)
         {
-            var userId = user.Id;
+            var userId = user!.Id;
             using var db = new ApplicationContext();
             var userFromDb = db.Users.Where(x => x.Id == userId);
             return userFromDb == null;
@@ -111,8 +111,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
-            Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
+            await Task.Run(() => Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException));
+            await Task.Run(() => Log.Debug(exception.Message, exception.StackTrace, exception.InnerException));
         }
 
         private async Task OnMessage(Message message, UpdateType type)
@@ -147,11 +147,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Редактировать", "Готово");
             var photo = _trip.Photo;
-            var userName = User.NickName;
-            var tripText = GetTripText(outPutLine, userName);
+            var userName = User!.NickName;
+            var tripText = GetTripText(outPutLine, userName!);
             try
             {
-                var botMessage = await BotClient.SendPhoto(chatId, photo, tripText, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
+                var botMessage = await BotClient.SendPhoto(chatId, photo!, tripText, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
                 _confirmMessageId = botMessage.Id;
             }
             catch (ApiRequestException e)
@@ -229,7 +229,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             _trip.Id = Guid.NewGuid();
             _trip.Status = TripStatus.New;
             _trip.DateCreated = DateTime.Now.Date;
-            _trip.User = User;
+            _trip.User = User!;
             return (true, BotPhrases.ConfirmTrip);
         }
 

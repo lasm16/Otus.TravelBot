@@ -48,8 +48,8 @@ namespace TelegramBot.Business.Scenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
-            Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
+            await Task.Run(() => Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException));
+            await Task.Run(() => Log.Debug(exception.Message, exception.StackTrace, exception.InnerException));
         }
 
         private async Task OnMessage(Message message, UpdateType type)
@@ -83,7 +83,7 @@ namespace TelegramBot.Business.Scenarios
 
         private static string GetUserName(User? tgUser)
         {
-            if (tgUser.FirstName != null)
+            if (tgUser!.FirstName != null)
             {
                 return tgUser.FirstName;
             }

@@ -33,7 +33,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnUpdate(Update update)
         {
-            var button = update.CallbackQuery.Data;
+            var button = update.CallbackQuery!.Data;
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
             await ButtonClick(button, chatId, messageId);
@@ -62,7 +62,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task DeleteClick(long chatId, int messageId)
         {
-            var userName = User.NickName;
+            var userName = User!.NickName;
             var index = _currentTripIndex;
             var tripToDelete = _myTrips[index];
             await DeleteFromDb(tripToDelete);
@@ -80,9 +80,9 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var trip = _myTrips[index];
             _currentTripIndex = index;
             var photo = trip.Photo;
-            var text = GetTripText(trip, userName);
+            var text = GetTripText(trip, userName!);
             var inlineMarkup = GetNavigationButtons(_myTrips.Count, index);
-            var media = new InputMediaPhoto(photo)
+            var media = new InputMediaPhoto(photo!)
             {
                 Caption = text,
             };
@@ -99,18 +99,18 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task PreviousClick(long chatId, int messageId)
         {
-            var userName = User.NickName;
+            var userName = User!.NickName;
             var index = _currentTripIndex - 1;
             var trip = _myTrips[index];
             _currentTripIndex = index;
             var photo = trip.Photo;
-            var text = GetTripText(trip, userName);
+            var text = GetTripText(trip, userName!);
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
             if (index == 0)
             {
                 inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Далее");
             }
-            var media = new InputMediaPhoto(photo)
+            var media = new InputMediaPhoto(photo!)
             {
                 Caption = text,
             };
@@ -120,18 +120,18 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task NextClick(long chatId, int messageId)
         {
-            var userName = User.NickName;
+            var userName = User!.NickName;
             var index = _currentTripIndex + 1;
             var trip = _myTrips[index];
             _currentTripIndex = index;
             var photo = trip.Photo;
-            var text = GetTripText(trip, userName);
+            var text = GetTripText(trip, userName!);
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
             if (index == _myTrips.Count - 1)
             {
                 inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад");
             }
-            var media = new InputMediaPhoto(photo)
+            var media = new InputMediaPhoto(photo!)
             {
                 Caption = text,
             };
@@ -141,7 +141,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task MyTripsClick(long chatId)
         {
-            var userName = User.NickName;
+            var userName = User!.NickName;
             if (_myTrips.Count == 0)
             {
                 await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound, cancellationToken: BotClient.GlobalCancelToken);
@@ -149,8 +149,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             var trip = _myTrips.FirstOrDefault();
             _currentTripIndex = 0;
-            var photo = trip.Photo;
-            var text = GetTripText(trip, userName);
+            var photo = trip!.Photo;
+            var text = GetTripText(trip, userName!);
 
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить");
 
@@ -160,7 +160,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             var botMessage1 = await BotClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({_myTrips.Count}):", cancellationToken: BotClient.GlobalCancelToken);
             _messageIdForPostsCount = botMessage1.MessageId;
-            var botMessage2 = await BotClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            var botMessage2 = await BotClient.SendPhoto(chatId, photo!, text, replyMarkup: inlineMarkup);
             _confirmMessageId = botMessage2.MessageId;
         }
 
@@ -188,8 +188,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
-            Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
+            await Task.Run(() => Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException));
+            await Task.Run(() => Log.Debug(exception.Message, exception.StackTrace, exception.InnerException));
         }
 
         private async Task OnMessage(Message message, UpdateType type)
@@ -254,7 +254,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             using var db = new ApplicationContext();
             var trips = db.Trips.ToList();
-            return [.. trips.Where(x => x.UserId == User.Id).OrderBy(x => x.DateCreated)];
+            return [.. trips.Where(x => x.UserId == User!.Id).OrderBy(x => x.DateCreated)];
         }
     }
 }

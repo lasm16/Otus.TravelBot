@@ -33,7 +33,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnUpdate(Update update)
         {
-            var button = update.CallbackQuery.Data;
+            var button = update.CallbackQuery!.Data;
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
             if (_trips.Count == 0)
@@ -87,8 +87,8 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
-            Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
+            await Task.Run(() => Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException));
+            await Task.Run(() => Log.Debug(exception.Message, exception.StackTrace, exception.InnerException));
         }
 
         private async Task SearchTripsWithInputLine(string inputLine, long chatId)
@@ -104,7 +104,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var trip = _searchedTrips[_currentTripIndex];
             var (text, photo) = GetTripText(trip);
 
-            InlineKeyboardMarkup inlineMarkup = null;
+            InlineKeyboardMarkup? inlineMarkup = null;
 
             if (_searchedTrips.Count > 1)
             {
@@ -142,7 +142,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
             var text = message.ToString();
             var photo = trip.Photo;
-            return (text, photo);
+            return (text!, photo!);
         }
 
         private static List<Trip> GetTrips()
@@ -199,7 +199,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var trip = _trips[_currentTripIndex];
             var (text, photo) = GetTripText(trip);
 
-            InlineKeyboardMarkup inlineMarkup = null;
+            InlineKeyboardMarkup? inlineMarkup = null;
 
             if (_trips.Count > 1)
             {
@@ -297,7 +297,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             else
             {
-                return [.. _trips.Where(x => x.City.Equals(inputLine) || x.Country.Equals(inputLine)).OrderBy(x => x.DateStart)];
+                return [.. _trips.Where(x => x.City!.Equals(inputLine) || x.Country!.Equals(inputLine)).OrderBy(x => x.DateStart)];
             }
         }
     }

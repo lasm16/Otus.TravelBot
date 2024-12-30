@@ -27,7 +27,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private async Task OnUpdate(Update update)
         {
-            var button = update.CallbackQuery.Data;
+            var button = update.CallbackQuery!.Data;
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
             await ButtonClick(button, chatId, messageId);
@@ -193,7 +193,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             }
             var trip = _trips.FirstOrDefault();
             _currentTripIndex = 0;
-            var (text, photo) = GetTripTextWithPhoto(trip);
+            var (text, photo) = GetTripTextWithPhoto(trip!);
 
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Принять", "Отклонить");
 
@@ -295,7 +295,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
             var text = message.ToString();
             var photo = trip.Photo;
-            return (text, photo);
+            return (text!, photo!);
         }
 
         private static string? GetUserName(long userId)
@@ -306,8 +306,8 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
-            Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
+            await Task.Run(() => Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException));
+            await Task.Run(() => Log.Debug(exception.Message, exception.StackTrace, exception.InnerException));
         }
 
         private async Task OnMessage(Message message, UpdateType type)
