@@ -29,10 +29,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             User = user;
         }
 
-        public void Launch()
-        {
-            SubscribeEvents();
-        }
+        public void Launch() => SubscribeEvents();
 
         private async Task OnUpdate(Update update)
         {
@@ -41,7 +38,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             var messageId = update.CallbackQuery.Message.Id;
             if (_trips.Count == 0)
             {
-                await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound);
+                await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound, cancellationToken: BotClient.GlobalCancelToken);
                 return;
             }
             await ButtonClick(button, chatId, messageId);
@@ -61,7 +58,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 {
                     try
                     {
-                        await BotClient.EditMessageReplyMarkup(chatId, _currentMessageId, null);
+                        await BotClient.EditMessageReplyMarkup(chatId, _currentMessageId, null, cancellationToken: BotClient.GlobalCancelToken);
                     }
                     catch (ApiRequestException e)
                     {
@@ -77,7 +74,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 try
                 {
-                    await BotClient.EditMessageReplyMarkup(chatId, _currentMessageId, null);
+                    await BotClient.EditMessageReplyMarkup(chatId, _currentMessageId, null, cancellationToken: BotClient.GlobalCancelToken);
                 }
                 catch (ApiRequestException e)
                 {
@@ -100,7 +97,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
             if (_searchedTrips.Count == 0)
             {
-                await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound);
+                await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound, cancellationToken: BotClient.GlobalCancelToken);
                 return;
             }
             _currentTripIndex = 0;
@@ -114,11 +111,11 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 inlineMarkup = Helper.GetInlineKeyboardMarkup("Далее");
             }
             var message = BotPhrases.TripsFound + $" ({_searchedTrips.Count}):";
-            await BotClient.SendMessage(chatId, message);
+            await BotClient.SendMessage(chatId, message, cancellationToken: BotClient.GlobalCancelToken);
 
             try
             {
-                await BotClient.DeleteMessage(chatId, _currentMessageId);
+                await BotClient.DeleteMessage(chatId, _currentMessageId, cancellationToken: BotClient.GlobalCancelToken);
             }
             catch (ApiRequestException e)
             {
@@ -195,7 +192,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             _trips = GetTrips();
             if (_trips.Count == 0)
             {
-                await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound);
+                await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound, cancellationToken: BotClient.GlobalCancelToken);
                 return;
             }
 
@@ -209,10 +206,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 inlineMarkup = Helper.GetInlineKeyboardMarkup("Далее");
             }
 
-            await BotClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null);
+            await BotClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null, cancellationToken: BotClient.GlobalCancelToken);
             var message = BotPhrases.TripsFound + $" ({_trips.Count}):";
-            await BotClient.SendMessage(chatId, message);
-            var botMessage = await BotClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup);
+            await BotClient.SendMessage(chatId, message, cancellationToken: BotClient.GlobalCancelToken);
+            var botMessage = await BotClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
             _currentMessageId = botMessage.MessageId;
         }
 
@@ -239,7 +236,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 Caption = text,
             };
-            var botMessage = await BotClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            var botMessage = await BotClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
             _currentMessageId = botMessage.MessageId;
 
         }
@@ -273,16 +270,16 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             {
                 Caption = text,
             };
-            var botMessage = await BotClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup);
+            var botMessage = await BotClient.EditMessageMedia(chatId, messageId, media, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
             _currentMessageId = botMessage.MessageId;
         }
 
         private async Task FindFellowClick(long chatId, int messageId, string message)
         {
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Показать все");
-            var botMessage = await BotClient.SendMessage(chatId, message, replyMarkup: inlineMarkup);
+            var botMessage = await BotClient.SendMessage(chatId, message, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
             _currentMessageId = botMessage.MessageId;
-            await BotClient.EditMessageReplyMarkup(chatId, messageId);
+            await BotClient.EditMessageReplyMarkup(chatId, messageId, cancellationToken: BotClient.GlobalCancelToken);
         }
 
         private static string? GetUserName(long userId)

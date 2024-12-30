@@ -2,6 +2,6 @@
 {
     public interface IRole
     {
-        public Dictionary<string, IScenario>? Actions { get; set; }
+        public IReadOnlyDictionary<string, IScenario>? Actions { get; set; }
     }
 }

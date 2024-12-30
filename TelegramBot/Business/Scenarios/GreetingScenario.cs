@@ -14,10 +14,8 @@ namespace TelegramBot.Business.Scenarios
         private List<string> _launchCommands = AppConfig.LaunchCommands;
 
         //заменить на инициализацию в конструкторе?
-        public void Launch()
-        {
-            SubscribeEvents();
-        }
+        public void Launch() => SubscribeEvents();
+
 
         private void SubscribeEvents()
         {
@@ -38,7 +36,7 @@ namespace TelegramBot.Business.Scenarios
         {
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
-            await BotClient.EditMessageReplyMarkup(chatId, messageId, null);
+            await BotClient.EditMessageReplyMarkup(chatId, messageId, null, cancellationToken: BotClient.GlobalCancelToken);
         }
 
         private void UnsubscribeEvents()
@@ -65,7 +63,7 @@ namespace TelegramBot.Business.Scenarios
             if (!_launchCommands.Contains(inputLine))
             {
                 Log.Error("Некорректно указан сценарий!");
-                await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
+                await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand, cancellationToken: BotClient.GlobalCancelToken);
                 return;
             }
             var tgUser = message.From;
@@ -80,7 +78,7 @@ namespace TelegramBot.Business.Scenarios
                 inlineMarkup.AddButton(item, item);
             }
             var chatId = message.Chat.Id;
-            await BotClient.SendMessage(chatId, greetingsText!, replyMarkup: inlineMarkup);
+            await BotClient.SendMessage(chatId, greetingsText!, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
         }
 
         private static string GetUserName(User? tgUser)
