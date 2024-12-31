@@ -48,8 +48,11 @@ namespace TelegramBot.Business.Scenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            await Task.Run(() => Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException));
-            await Task.Run(() => Log.Debug(exception.Message, exception.StackTrace, exception.InnerException));
+            await Task.Run(() =>
+            {
+                Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
+                Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
+            }, cancellationToken: BotClient.GlobalCancelToken);
         }
 
         private async Task OnMessage(Message message, UpdateType type)
