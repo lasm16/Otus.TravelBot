@@ -1,5 +1,6 @@
 ﻿using DataBase.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace DataBase
 {
@@ -10,10 +11,13 @@ namespace DataBase
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionString = System.Configuration.ConfigurationManager.AppSettings["connectionString"];
+            IConfigurationBuilder builder = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true);
+            IConfigurationRoot root = builder.Build();
+            var connectionString = root["AppSettings:ConnectionString"];
+
             if (connectionString == null)
             {
-                throw new ArgumentNullException(connectionString, "Не установлена строка подключения к БД в App.config!");
+                throw new ArgumentNullException(connectionString, "Не установлена строка подключения к БД в appsettings.json!");
             }
             optionsBuilder.UseSqlServer(connectionString);
         }

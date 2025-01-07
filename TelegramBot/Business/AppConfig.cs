@@ -1,23 +1,27 @@
-﻿namespace TelegramBot.Business
+﻿using Microsoft.Extensions.Configuration;
+
+namespace TelegramBot.Business
 {
     public static class AppConfig
     {
-        public static string? Token => System.Configuration.ConfigurationManager.AppSettings["userBotToken"];
+        private static readonly IConfigurationBuilder builder = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true);
+        private static readonly IConfigurationRoot root = builder.Build();
+        public static string? Token => root["AppSettings:UserBotToken"];
         public static List<string> LaunchCommands => GetLaunchCommands();
-        public static string? ConnectionString => System.Configuration.ConfigurationManager.AppSettings["connectionString"];
+        public static string? ConnectionString => root["AppSettings:ConnectionString"];
 
 
         private static List<string> GetLaunchCommands()
         {
-            var list = System.Configuration.ConfigurationManager.AppSettings["launchCommand"];
-            if (list == null)
+            var keyValuePairs = root.GetSection("AppSettings:LaunchCommands").AsEnumerable().ToDictionary();
+            if (keyValuePairs == null)
             {
                 return
                 [
                     "/start"
                 ];
             }
-            return [.. list.Split([','], StringSplitOptions.RemoveEmptyEntries)];
+            return [.. keyValuePairs.Values.Where(x => x != null)];
         }
     }
 }
