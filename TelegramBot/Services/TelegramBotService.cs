@@ -16,7 +16,7 @@ namespace TelegramBot.Services
             using var cts = new CancellationTokenSource();
             if (_key == null || string.Empty.Equals(_key))
             {
-                throw new ArgumentNullException(_key, "Не установлен токен в App.config!");
+                throw new ArgumentNullException(_key, "Не установлен токен в appsettings.json");
             }
             _botClient = new TelegramBotClient(_key, cancellationToken: cts.Token);
             var me = await _botClient.GetMe(cancellationToken: cts.Token);
