@@ -140,7 +140,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private async Task AcceptAll()
         {
-            var db = new ApplicationContext();
+            using var db = new ApplicationContext();
             foreach (var trip in _trips)
             {
                 trip.Status = TripStatus.Accepted;
@@ -151,7 +151,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private async Task DeclineAll()
         {
-            var db = new ApplicationContext();
+            using var db = new ApplicationContext();
             foreach (var trip in _trips)
             {
                 trip.Status = TripStatus.Declined;
@@ -163,7 +163,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
         private async Task Decline(Trip trip)
         {
             trip.Status = TripStatus.Declined;
-            var db = new ApplicationContext();
+            using var db = new ApplicationContext();
             db.Trips.Update(trip);
             await db.SaveChangesAsync(cancellationToken: BotClient.GlobalCancelToken);
         }
@@ -171,7 +171,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
         private async Task Accept(Trip trip)
         {
             trip.Status = TripStatus.Accepted;
-            var db = new ApplicationContext();
+            using var db = new ApplicationContext();
             db.Trips.Update(trip);
             await db.SaveChangesAsync(cancellationToken: BotClient.GlobalCancelToken);
         }
@@ -300,7 +300,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
 
         private static string? GetUserName(long userId)
         {
-            var db = new ApplicationContext();
+            using var db = new ApplicationContext();
             return db.Users.Where(x => x.Id == userId).FirstOrDefault()!.NickName;
         }
 

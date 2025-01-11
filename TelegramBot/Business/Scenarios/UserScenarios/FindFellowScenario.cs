@@ -287,7 +287,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private static string? GetUserName(long userId)
         {
-            var db = new ApplicationContext();
+            using var db = new ApplicationContext();
             return db.Users.Where(x => x.Id == userId).FirstOrDefault()!.NickName;
         }
 
