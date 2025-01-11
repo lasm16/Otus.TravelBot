@@ -11,13 +11,11 @@ namespace TelegramBot.Business.Scenarios
 {
     public class GreetingScenario(TelegramBotClient botClient) : BaseScenario(botClient), IScenario
     {
-        private readonly string? _launchCommand = AppConfig.LaunchCommand;
+        private List<string> _launchCommands = AppConfig.LaunchCommands;
 
         //заменить на инициализацию в конструкторе?
-        public void Launch()
-        {
-            SubscribeEvents();
-        }
+        public void Launch() => SubscribeEvents();
+
 
         private void SubscribeEvents()
         {
@@ -38,7 +36,7 @@ namespace TelegramBot.Business.Scenarios
         {
             var chatId = update.CallbackQuery!.Message!.Chat.Id;
             var messageId = update.CallbackQuery.Message.Id;
-            await BotClient.EditMessageReplyMarkup(chatId, messageId, null);
+            await BotClient.EditMessageReplyMarkup(chatId, messageId, null, cancellationToken: BotClient.GlobalCancelToken);
         }
 
         private void UnsubscribeEvents()
@@ -50,27 +48,31 @@ namespace TelegramBot.Business.Scenarios
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception.Message, exception.StackTrace);
-            Log.Debug(exception.Message, exception.StackTrace);
+            await Task.Run(() =>
+            {
+                Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
+                Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
+            }, cancellationToken: BotClient.GlobalCancelToken);
         }
 
         private async Task OnMessage(Message message, UpdateType type)
         {
-            if (message.Text is null)
+            var inputLine = message.Text ?? message.Photo!.Last().FileId;
+            if (inputLine == null)
             {
                 return;
             }
             CheckRole(message);
-            var action = message.Text;
-            if (!action.Equals(_launchCommand))
+            if (!_launchCommands.Contains(inputLine))
             {
                 Log.Error("Некорректно указан сценарий!");
-                await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
+                await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand, cancellationToken: BotClient.GlobalCancelToken);
                 return;
             }
+            var tgUser = message.From;
+            var userName = GetUserName(tgUser);
 
-            var currentUser = message.From!.FirstName + " " + message.From.LastName;
-            var greetingsText = BotPhrases.Greeting1 + currentUser + BotPhrases.Greeting2;
+            var greetingsText = BotPhrases.Greeting1 + userName + BotPhrases.Greeting2;
 
             var actions = Role!.Actions!.Keys;
             var inlineMarkup = new InlineKeyboardMarkup();
@@ -79,7 +81,20 @@ namespace TelegramBot.Business.Scenarios
                 inlineMarkup.AddButton(item, item);
             }
             var chatId = message.Chat.Id;
-            await BotClient.SendMessage(chatId, greetingsText!, replyMarkup: inlineMarkup);
+            await BotClient.SendMessage(chatId, greetingsText!, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
+        }
+
+        private static string GetUserName(User? tgUser)
+        {
+            if (tgUser!.FirstName != null)
+            {
+                return tgUser.FirstName;
+            }
+            if (tgUser.Username != null)
+            {
+                return tgUser.Username;
+            }
+            return "друг";
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿using Common.Model;
-using Common.Model.Bot;
+﻿using Common.Model.Bot;
+using DataBase;
+using DataBase.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Business.Bot.Roles;
@@ -10,11 +11,10 @@ namespace TelegramBot.Business.Scenarios
 {
     public abstract class BaseScenario(TelegramBotClient botClient)
     {
-        public IRole Role { get; set; }
-        public Common.Model.User? User { get; set; }
+        public IRole? Role { get; set; }
+        public DataBase.Models.User? User { get; set; }
         public TelegramBotClient BotClient { get; set; } = botClient;
-
-        private readonly string? _adminName = AppConfig.AdminName;
+        private static List<long> _admins => GetAdminIds();
 
         public IScenario GetScenario(Update update)
         {
@@ -30,34 +30,34 @@ namespace TelegramBot.Business.Scenarios
                 return;
             }
             var tgUser = message.From;
-            User = GetUser(tgUser!); // здесь должна быть проверка роли админ/юзер через значение в бд
-            if (UserType.Admin == User.UserType)
+            User = GetUser(tgUser!);
+            if (UserType.Admin == User.Type)
             {
                 SetAdminActions();
             }
-            else if (UserType.SimpleUser == User.UserType)
+            else if (UserType.SimpleUser == User.Type)
             {
                 SetUserActions();
             }
         }
 
-        private Common.Model.User GetUser(Telegram.Bot.Types.User user)
+        private DataBase.Models.User GetUser(Telegram.Bot.Types.User user)
         {
-            var nickName = user.Username;
-            if (nickName == _adminName)
+            var userId = user.Id;
+            if (_admins.Contains(userId))
             {
-                return new Common.Model.User()
+                return new DataBase.Models.User()
                 {
                     Id = user.Id,
-                    UserName = user.Username,
-                    UserType = UserType.Admin
+                    NickName = user.Username,
+                    Type = UserType.Admin
                 };
             }
-            return new Common.Model.User()
+            return new DataBase.Models.User()
             {
                 Id = user.Id,
-                UserName = user.Username,
-                UserType = UserType.SimpleUser
+                NickName = user.Username,
+                Type = UserType.SimpleUser
             };
         }
 
@@ -67,9 +67,9 @@ namespace TelegramBot.Business.Scenarios
             {
                 Actions = new Dictionary<string, IScenario>
                 {
-                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User) },
-                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User) },
-                    { "Найти попутчика",    new FindFellowScenario(BotClient, User) }
+                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User!) },
+                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User!) },
+                    { "Найти попутчика",    new FindFellowScenario(BotClient, User!) }
                 }
             };
         }
@@ -81,11 +81,18 @@ namespace TelegramBot.Business.Scenarios
                 Actions = new Dictionary<string, IScenario>
                 {
                     { "Новые посты",        new ShowNewPostsScenario(BotClient) },
-                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User) },
-                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User) },
-                    { "Найти попутчика",    new FindFellowScenario(BotClient, User) }
+                    { "Новая поездка",      new CreateNewTripScenario(BotClient, User!) },
+                    { "Мои поездки",        new ShowMyTripsScenario(BotClient, User!) },
+                    { "Найти попутчика",    new FindFellowScenario(BotClient, User!) }
                 }
             };
+        }
+
+        private static List<long> GetAdminIds()
+        {
+            using var db = new ApplicationContext();
+            var users = db.Users.ToList();
+            return users.Where(x => x.Type == UserType.Admin).Select(x => x.Id).ToList();
         }
     }
 }

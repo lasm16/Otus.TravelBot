@@ -1,4 +1,4 @@
-﻿using Common.Model;
+﻿using DataBase.Models;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot.Business.Bot

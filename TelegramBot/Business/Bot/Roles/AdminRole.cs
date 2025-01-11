@@ -2,8 +2,8 @@
 
 namespace TelegramBot.Business.Bot.Roles
 {
-    internal class AdminRole() : IRole
+    public class AdminRole() : IRole
     {
-        public Dictionary<string, IScenario>? Actions { get; set; }
+        public IReadOnlyDictionary<string, IScenario>? Actions { get; set; }
     }
 }
