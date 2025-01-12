@@ -80,7 +80,7 @@ namespace TelegramBot.Business.Scenarios
             {
                 Actions = new Dictionary<string, IScenario>
                 {
-                    { "Новые посты",        new ShowNewPostsScenario(BotClient) },
+                    { "Новые посты",        new ShowNewPostsScenario(BotClient, User!) },
                     { "Новая поездка",      new CreateNewTripScenario(BotClient, User!) },
                     { "Мои поездки",        new ShowMyTripsScenario(BotClient, User!) },
                     { "Найти попутчика",    new FindFellowScenario(BotClient, User!) }

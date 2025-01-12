@@ -14,7 +14,7 @@ using DataBase;
 
 namespace TelegramBot.Business.Scenarios.AdminScenarios
 {
-    public class ShowNewPostsScenario(TelegramBotClient botClient) : BaseScenario(botClient), IScenario
+    public class ShowNewPostsScenario : BaseScenario, IScenario
     {
         private int _currentTripIndex = 0;
         private int _confirmMessageId = 0;
@@ -22,6 +22,12 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
         private List<Trip> _trips => GetNewTrips();
 
         private List<string> _launchCommands = AppConfig.LaunchCommands;
+
+        public ShowNewPostsScenario(TelegramBotClient botClient, DataBase.Models.User user) : base(botClient)
+        {
+            BotClient = botClient;
+            User = user;
+        }
 
         public void Launch() => SubscribeEvents();
 
@@ -308,7 +314,10 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
         {
             await Task.Run(() =>
             {
-                Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
+                var message = exception.Message;
+                var inner = exception.InnerException;
+                Console.WriteLine(message);
+                Console.WriteLine(inner);
                 Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
             }, cancellationToken: BotClient.GlobalCancelToken);
         }
@@ -340,7 +349,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
                 }
             }
             UnsubscribeEvents();
-            var scenario = new GreetingScenario(BotClient);
+            var scenario = new GreetingScenario(BotClient, User!);
             scenario.Launch();
         }
 

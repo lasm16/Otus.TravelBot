@@ -66,7 +66,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                     }
                 }
                 UnsubscribeEvents();
-                var scenario = new GreetingScenario(BotClient);
+                var scenario = new GreetingScenario(BotClient, User!);
                 scenario.Launch();
                 return;
             }
@@ -89,7 +89,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
         {
             await Task.Run(() =>
             {
-                Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
+                var message = exception.Message;
+                var inner = exception.InnerException;
+                Console.WriteLine(message);
+                Console.WriteLine(inner);
                 Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
             }, cancellationToken: BotClient.GlobalCancelToken);
         }

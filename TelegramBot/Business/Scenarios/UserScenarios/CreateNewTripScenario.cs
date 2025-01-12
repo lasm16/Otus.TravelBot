@@ -79,41 +79,48 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             await BotClient.SendMessage(chatId, BotPhrases.Done, cancellationToken: BotClient.GlobalCancelToken);
             await BotClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null, cancellationToken: BotClient.GlobalCancelToken);
             UnsubscribeEvents();
-            var scenario = new GreetingScenario(BotClient);
+            var scenario = new GreetingScenario(BotClient, User!);
             scenario.Launch();
         }
 
         private async Task SaveToDb()
         {
-            var isNewUser = CheckUser(User);
-            if (isNewUser)
-            {
-                using var db = new ApplicationContext();
-                await db.Trips.AddAsync(_trip, cancellationToken: BotClient.GlobalCancelToken);
-                await db.SaveChangesAsync(cancellationToken: BotClient.GlobalCancelToken);
-            }
-            else
+            var isOldUser = IsUserInDb(User);
+            if (isOldUser)
             {
                 using var db = new ApplicationContext();
                 db.Users.Attach(User!);
                 await db.Trips.AddAsync(_trip, cancellationToken: BotClient.GlobalCancelToken);
                 await db.SaveChangesAsync(cancellationToken: BotClient.GlobalCancelToken);
             }
+            else
+            {
+                using var db = new ApplicationContext();
+                await db.Trips.AddAsync(_trip, cancellationToken: BotClient.GlobalCancelToken);
+                await db.SaveChangesAsync(cancellationToken: BotClient.GlobalCancelToken);
+            }
         }
 
-        private static bool CheckUser(DataBase.Models.User? user)
+        private static bool IsUserInDb(DataBase.Models.User? user)
         {
             var userId = user!.Id;
             using var db = new ApplicationContext();
-            var userFromDb = db.Users.Where(x => x.Id == userId);
-            return userFromDb == null;
+            var userFromDb = db.Users.Where(x => x.Id == userId).FirstOrDefault();
+            if (userFromDb != null)
+            {
+                return true;
+            }
+            return false;
         }
 
         private async Task OnError(Exception exception, HandleErrorSource source)
         {
             await Task.Run(() =>
             {
-                Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
+                var message = exception.Message;
+                var inner = exception.InnerException;
+                Console.WriteLine(message);
+                Console.WriteLine(inner);
                 Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
             }, cancellationToken: BotClient.GlobalCancelToken);
         }
@@ -133,7 +140,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                     await BotClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null, cancellationToken: BotClient.GlobalCancelToken);
                 }
                 UnsubscribeEvents();
-                var scenario = new GreetingScenario(BotClient);
+                var scenario = new GreetingScenario(BotClient, User!);
                 scenario.Launch();
                 return;
             }
@@ -198,7 +205,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 var isCorrectDate = IsCorrectStartDate(inputText);
                 if (!isCorrectDate)
                 {
-                    return (false, BotPhrases.EnterStartDateError);
+                    return (false, BotPhrases.EnterStartDateError + " " + BotPhrases.EnterDateError);
                 }
                 _ = DateTime.TryParse(inputText, out var result);
                 _trip.DateStart = result;
@@ -214,7 +221,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
                 var isCorrectDate = IsCorrectEndDate(inputText);
                 if (!isCorrectDate)
                 {
-                    return (false, BotPhrases.EnterStartDateError);
+                    return (false, BotPhrases.EnterStartDateError + " " + BotPhrases.EnterDateError);
                 }
                 _ = DateTime.TryParse(inputText, out var result);
                 _trip.DateEnd = result;

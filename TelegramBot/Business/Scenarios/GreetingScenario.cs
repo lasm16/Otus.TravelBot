@@ -9,9 +9,15 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot.Business.Scenarios
 {
-    public class GreetingScenario(TelegramBotClient botClient) : BaseScenario(botClient), IScenario
+    public class GreetingScenario: BaseScenario, IScenario
     {
         private List<string> _launchCommands = AppConfig.LaunchCommands;
+
+        public GreetingScenario(TelegramBotClient botClient, DataBase.Models.User user) : base(botClient)
+        {
+            BotClient = botClient;
+            User = user;
+        }
 
         //заменить на инициализацию в конструкторе?
         public void Launch() => SubscribeEvents();
@@ -50,7 +56,10 @@ namespace TelegramBot.Business.Scenarios
         {
             await Task.Run(() =>
             {
-                Console.WriteLine(exception.Message, exception.StackTrace, exception.InnerException);
+                var message = exception.Message;
+                var inner = exception.InnerException;
+                Console.WriteLine(message);
+                Console.WriteLine(inner);
                 Log.Debug(exception.Message, exception.StackTrace, exception.InnerException);
             }, cancellationToken: BotClient.GlobalCancelToken);
         }

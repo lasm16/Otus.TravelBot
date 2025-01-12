@@ -21,7 +21,7 @@ namespace TelegramBot.Services
             _botClient = new TelegramBotClient(_key, cancellationToken: cts.Token);
             var me = await _botClient.GetMe(cancellationToken: cts.Token);
 
-            var scenario = new GreetingScenario(_botClient);
+            var scenario = new GreetingScenario(_botClient, null!);
             scenario.Launch();
 
             Console.WriteLine($"@{me!.Username} is running... Press Esc to terminate");
