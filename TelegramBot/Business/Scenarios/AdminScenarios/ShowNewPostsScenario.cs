@@ -210,6 +210,7 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
             await BotClient.EditMessageReplyMarkup(chatId, messageId, replyMarkup: null, cancellationToken: BotClient.GlobalCancelToken);
             var botMessage = await BotClient.SendPhoto(chatId, photo, text, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
             _confirmMessageId = botMessage.MessageId;
+            _messageIdForPostsCount = 0;
         }
 
         private async Task PreviousClick(long chatId, int messageId)
@@ -347,6 +348,10 @@ namespace TelegramBot.Business.Scenarios.AdminScenarios
                     Log.Error(ex.Message, ex.StackTrace);
                     Console.WriteLine(ex.Message, ex.StackTrace);
                 }
+            }
+            if (_messageIdForPostsCount != 0)
+            {
+                await BotClient.EditMessageReplyMarkup(chatId, _messageIdForPostsCount, null, cancellationToken: BotClient.GlobalCancelToken);
             }
             UnsubscribeEvents();
             var scenario = new GreetingScenario(BotClient, User!);

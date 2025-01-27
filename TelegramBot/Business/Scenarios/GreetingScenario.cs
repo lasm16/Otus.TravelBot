@@ -9,9 +9,10 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot.Business.Scenarios
 {
-    public class GreetingScenario: BaseScenario, IScenario
+    public class GreetingScenario : BaseScenario, IScenario
     {
         private List<string> _launchCommands = AppConfig.LaunchCommands;
+        private int _messageToDelete = 0;
 
         public GreetingScenario(TelegramBotClient botClient, DataBase.Models.User user) : base(botClient)
         {
@@ -90,7 +91,12 @@ namespace TelegramBot.Business.Scenarios
                 inlineMarkup.AddButton(item, item);
             }
             var chatId = message.Chat.Id;
-            await BotClient.SendMessage(chatId, greetingsText!, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
+            if (_messageToDelete != 0)
+            {
+                await BotClient.EditMessageReplyMarkup(chatId, _messageToDelete, null, cancellationToken: BotClient.GlobalCancelToken);
+            }
+            var messageToDelete = await BotClient.SendMessage(chatId, greetingsText!, replyMarkup: inlineMarkup, cancellationToken: BotClient.GlobalCancelToken);
+            _messageToDelete = messageToDelete.Id;
         }
 
         private static string GetUserName(User? tgUser)

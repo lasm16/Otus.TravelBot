@@ -209,14 +209,14 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             if (!_launchCommands.Contains(inputLine))
             {
                 Log.Error("Некорректно указан сценарий!");
-                await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand);
+                await BotClient.SendMessage(message.Chat.Id, BotPhrases.UnknownCommand, cancellationToken: BotClient.GlobalCancelToken);
                 return;
             }
             if (_confirmMessageId != 0)
             {
                 try
                 {
-                    await BotClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null);
+                    await BotClient.EditMessageReplyMarkup(chatId, _confirmMessageId, null, cancellationToken: BotClient.GlobalCancelToken);
                 }
                 catch (ApiRequestException ex)
                 {
