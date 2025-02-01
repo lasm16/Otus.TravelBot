@@ -62,7 +62,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task DeleteClick(long chatId, int messageId)
         {
-            var userName = User!.NickName;
             var index = _currentTripIndex;
             var tripToDelete = _myTrips[index];
             await DeleteFromDb(tripToDelete);
@@ -79,9 +78,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             var trip = _myTrips[index];
             _currentTripIndex = index;
-            var photo = trip.Photo;
+            var userName = User!.NickName;
             var text = GetTripText(trip, userName!);
             var inlineMarkup = GetNavigationButtons(_myTrips.Count, index);
+            var photo = trip.Photo;
             var media = new InputMediaPhoto(photo!)
             {
                 Caption = text,
@@ -99,17 +99,17 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task PreviousClick(long chatId, int messageId)
         {
-            var userName = User!.NickName;
             var index = _currentTripIndex - 1;
             var trip = _myTrips[index];
             _currentTripIndex = index;
-            var photo = trip.Photo;
+            var userName = User!.NickName;
             var text = GetTripText(trip, userName!);
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
             if (index == 0)
             {
                 inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Далее");
             }
+            var photo = trip.Photo;
             var media = new InputMediaPhoto(photo!)
             {
                 Caption = text,
@@ -120,17 +120,17 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task NextClick(long chatId, int messageId)
         {
-            var userName = User!.NickName;
             var index = _currentTripIndex + 1;
             var trip = _myTrips[index];
             _currentTripIndex = index;
-            var photo = trip.Photo;
+            var userName = User!.NickName;
             var text = GetTripText(trip, userName!);
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад", "Далее");
             if (index == _myTrips.Count - 1)
             {
                 inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить", "Назад");
             }
+            var photo = trip.Photo;
             var media = new InputMediaPhoto(photo!)
             {
                 Caption = text,
@@ -141,7 +141,6 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
 
         private async Task MyTripsClick(long chatId)
         {
-            var userName = User!.NickName;
             if (_myTrips.Count == 0)
             {
                 await BotClient.SendMessage(chatId, BotPhrases.TripsNotFound, cancellationToken: BotClient.GlobalCancelToken);
@@ -149,7 +148,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             var trip = _myTrips.FirstOrDefault();
             _currentTripIndex = 0;
-            var photo = trip!.Photo;
+            var userName = User!.NickName;
             var text = GetTripText(trip, userName!);
 
             var inlineMarkup = Helper.GetInlineKeyboardMarkup("Удалить");
@@ -160,6 +159,7 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             }
             var botMessage1 = await BotClient.SendMessage(chatId, BotPhrases.TripsFound + $" ({_myTrips.Count}):", cancellationToken: BotClient.GlobalCancelToken);
             _messageIdForPostsCount = botMessage1.MessageId;
+            var photo = trip!.Photo;
             var botMessage2 = await BotClient.SendPhoto(chatId, photo!, text, replyMarkup: inlineMarkup);
             _confirmMessageId = botMessage2.MessageId;
         }
@@ -252,7 +252,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             message.Append("Дата начала поездки: " + trip.DateStart.ToShortDateString() + "\r\n");
             message.Append("Дата окончания поездки: " + trip.DateEnd.ToShortDateString() + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
-            message.Append("@" + userName);
+            if (userName != null)
+            {
+                message.Append("@" + userName);
+            }
             return message.ToString();
         }
 

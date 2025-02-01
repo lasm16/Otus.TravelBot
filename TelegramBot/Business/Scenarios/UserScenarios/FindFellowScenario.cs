@@ -144,7 +144,10 @@ namespace TelegramBot.Business.Scenarios.UserScenarios
             message.Append("Дата начала поездки: " + trip.DateStart.ToShortDateString() + "\r\n");
             message.Append("Дата окончания поездки: " + trip.DateEnd.ToShortDateString() + "\r\n");
             message.Append("Описание: \r\n" + trip.Description + "\r\n");
-            message.Append("@" + userName);
+            if (userName != null)
+            {
+                message.Append("@" + userName);
+            }
 
             var text = message.ToString();
             var photo = trip.Photo;
